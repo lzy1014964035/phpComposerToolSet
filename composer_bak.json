@@ -1,0 +1,26 @@
+{
+    "name": "lzy1014964035/phpComposerToolSet",
+    "description": "个人的工具集",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "John Smith",
+            "email": "john@example.com"
+        }
+    ],
+    "authors": [
+        {
+            "name": "wandehua",
+            "email": "271920545@qq.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "lzy1014964035\\PhpComposerToolSet\\": "src/"
+        }
+    },
+
+    "minimum-stability": "dev",
+    "require": {}
+}

@@ -1,0 +1,21 @@
+{
+  "name": "lzy1014964035/php_composer_tool_set",
+  "description": "lzy1014964035的个人的工具集",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "luzeyu",
+      "email": "1014964035@qq.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": ">=5.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "lzy1014964035\\PhpComposerToolSet\\": "src/lzy1014964035/PHPComposerToolSet"
+    }
+  }
+}
