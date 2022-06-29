@@ -9,6 +9,6 @@ namespace lzy1014964035\PHPComposerToolSet;
 class ServiceBase
 {
     public static function aaa(){
-        echo "aaabbbcccddd";die;
+        echo "aaabbbcccdddeee";die;
     }
 }
