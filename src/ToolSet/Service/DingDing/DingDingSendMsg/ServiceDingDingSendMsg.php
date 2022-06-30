@@ -5,18 +5,32 @@ namespace ToolSet\Service\DingDing\DingDingSendMsg;
 
 use ToolSet\Service\ServiceBase;
 
-class DingDingSendMsgService
+class ServiceDingDingSendMsg
 {
 
     // 机器人密钥
     private static $webhook = [
-        'https://oapi.dingtalk.com/robot/send?access_token=ef0bb6275a212dcb51b49472363757ce2d93e43f137624b5a6da82a20f2f8606',
-        'https://oapi.dingtalk.com/robot/send?access_token=1bc617fde60e73c96267f0b6c8c4f34f6ca5a63750d0d89b01e27b77aea5e8c6',
-        'https://oapi.dingtalk.com/robot/send?access_token=14046557d374c24da41d55348ae0ee9aeddf9f221149f9242fb3e8e6acbb4be6',
-        'https://oapi.dingtalk.com/robot/send?access_token=d052486161acba4d9c6149af26ecf892e88980325993b9f11351b230389da958',
-        'https://oapi.dingtalk.com/robot/send?access_token=7f28387f848a448e2d07ffd5603ee33315f3d8aa509023cfbf529c4cd7f99a54',
+
     ];
     private static $key = "b:";
+
+    /**
+     * 设置机器人组
+     * @param array $setArray
+     */
+    public static function setWebHook(array $setArray)
+    {
+        self::$webhook = $setArray;
+    }
+
+    /**
+     * 设置
+     * @param string $key
+     */
+    public static function setKey(string $key)
+    {
+        self::$key = $key;
+    }
 
     /**
      * 做个简易的均衡
