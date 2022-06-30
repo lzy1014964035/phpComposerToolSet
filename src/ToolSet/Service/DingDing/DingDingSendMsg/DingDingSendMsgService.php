@@ -3,6 +3,8 @@
 
 namespace ToolSet\Service\DingDing\DingDingSendMsg;
 
+use ToolSet\Service\ServiceBase;
+
 class DingDingSendMsgService
 {
 
@@ -91,7 +93,7 @@ class DingDingSendMsgService
     public static function dingdingSendData($data)
     {
         self::toSendText([
-            'time' => BaseService::getYmdHisDate(),
+            'time' => ServiceBase::getYmdHisDate(),
             'data' => $data,
         ]);
     }
@@ -103,7 +105,7 @@ class DingDingSendMsgService
     public static function dingdingSendError($errorData)
     {
         self::toSendText([
-            'time' => BaseService::getYmdHisDate(),
+            'time' => ServiceBase::getYmdHisDate(),
             'errorData' => $errorData,
         ]);
     }
