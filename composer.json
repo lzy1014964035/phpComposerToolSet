@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-4": {
-      "lzy1014964035\\PHPComposerToolSet\\": "src/lzy1014964035/PHPComposerToolSet"
+      "PHPComposerToolSet\\": "src/PHPComposerToolSet"
     }
   }
 }
