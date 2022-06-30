@@ -145,9 +145,9 @@ trait ServiceArray
                 self::clearDecimalPoint($value, $continueArray);
             }
             if (is_string($value) && strpos($value, '.') > -1 && strpos($value, '%') < -1) {
-                $value = ServiceString::format2num($value);
+                $value = ServiceString::formatToNum($value);
                 $value = round($value, 2);
-                $value = ServiceString::num2format($value, 2);
+                $value = ServiceString::numToFormat($value, 2);
 
                 // 去除小数点
 //                $value = explode('.', $value)[0];
@@ -205,6 +205,96 @@ trait ServiceArray
                 self::makeDataShowField($value, $showField);
             }
         }
+    }
+
+
+    /**
+     * 数组排序
+     * @param $array
+     * @param $keys
+     * @param string $sort
+     * @return array
+     */
+    public static function arraySort($array, $keys, $sort = 'asc')
+    {
+        $newArr = $valArr = array();
+        foreach ($array as $key => $value) {
+            $valArr[$key] = $value[$keys];
+        }
+        ($sort == 'asc') ? asort($valArr) : arsort($valArr);
+        reset($valArr);
+        foreach ($valArr as $key => $value) {
+            $newArr[$key] = $array[$key];
+        }
+        return $newArr;
+    }
+
+    /**
+     * 操作数组（用于计算合计之类的）
+     * @param $array
+     * @param $callBackFunction
+     * @return array
+     * @throws \ErrorException
+     */
+    public static function activeArrayData($array, $callBackFunction)
+    {
+        if (!is_callable($callBackFunction)) {
+            ServiceBase::throwException('数组操作请传入有效的回调');
+        }
+        $setArray = $array[0];
+        $returnArray = [];
+        self::activeArrayDataWithRecursion($setArray, $array, $returnArray, $callBackFunction);
+        return $returnArray;
+    }
+
+    // 操作数组 - 递归处理
+    private static function activeArrayDataWithRecursion($data, $array, &$returnArray, $callBackFunction)
+    {
+        foreach ($data as $key => $value) {
+            $arrayColumn = array_column($array, $key);
+            if (is_array($value)) {
+                $returnArray[$key] = [];
+                self::activeArrayDataWithRecursion($value, $arrayColumn, $returnArray[$key], $callBackFunction);
+            } else {
+                $returnArray[$key] = $callBackFunction($key, $arrayColumn, $returnArray);
+            }
+        }
+    }
+
+    /**
+     * 给数组替换key
+     * @param $array
+     * @param $keyConfig
+     */
+    public static function arrayReplaceKey(&$array, $keyConfig)
+    {
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                self::arrayReplaceKey($value, $keyConfig);
+            }
+            if (isset($keyConfig[$key]) && $keyConfig[$key] != $key) {
+                $array[$keyConfig[$key]] = $value;
+                unset($array[$key]);
+                continue;
+            }
+        }
+    }
+
+    /**
+     * 获取数组中对应的一些字段的键和值，适用于一维数组
+     * @param $array
+     * @param $fieldArray
+     * @return array
+     */
+    public static function getArrayFieldsKeyAndValue($array, $fieldArray)
+    {
+        $returnArray = [];
+        foreach ($fieldArray as $field) {
+            if (isset($array[$field])) {
+                $returnArray[$field] = $array[$field];
+            }
+        }
+        return $returnArray;
     }
 
 }

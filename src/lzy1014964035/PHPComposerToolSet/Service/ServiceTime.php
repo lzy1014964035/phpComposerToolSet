@@ -189,4 +189,189 @@ trait ServiceTime
         return $setMonth;
     }
 
+
+    /**
+     * 获取内容中的所有为月份的key
+     * @param $data
+     * @return array
+     */
+    public static function getDataMonthKeyArray($data)
+    {
+        $monthArray = [];
+        foreach ($data as $key => $value) {
+            if (strtotime($key) > 0) {
+                $monthArray[] = $key;
+            }
+        }
+        return $monthArray;
+    }
+
+    /**
+     * 获取两个Month之间的所有月份的数组
+     * @param null $monthOne
+     * @param null $monthTwo
+     * @return array
+     */
+    public static function getTwoMonthBetweenMonthArray($monthOne = null, $monthTwo = null)
+    {
+        if (is_array($monthOne)) {
+            $monthTwo = $monthOne[count($monthOne) - 1];
+            $monthOne = $monthOne[0];
+        }
+        $monthOne = strtotime($monthOne);
+        $monthOne = date("Y-m", $monthOne);
+        $monthTwo = strtotime($monthTwo);
+        $monthTwo = date("Y-m", $monthTwo);
+
+        $returnArray = [];
+
+        while (true) {
+            if (strtotime($monthOne) <= strtotime($monthTwo)) {
+                $returnArray[] = $monthOne;
+                $monthOne = strtotime("{$monthOne} +1 month");
+                $monthOne = date("Y-m", $monthOne);
+            } else {
+                break;
+            }
+        }
+
+        return $returnArray;
+    }
+
+    /**
+     * 获取所属季度中至此的月份
+     * @param $month
+     * @return array
+     */
+    public static function getQuarterWithNowMonth($month)
+    {
+        $quarter = self::getMonthQuarter($month);
+        $year = self::getDateYearString($month);
+        $monthArray = self::getQuarterMonths($year, $quarter);
+        foreach ($monthArray as $key => $monthString) {
+            if (strtotime($monthString) > strtotime($month)) {
+                unset($monthArray[$key]);
+            }
+        }
+        return $monthArray;
+    }
+
+    /**
+     * 获取一个季度拥有的月份
+     * @param $year
+     * @param $quarter
+     * @return array
+     */
+    public static function getQuarterMonths($year, $quarter)
+    {
+        $quarterConfig = [
+            1 => [
+                '01',
+                '02',
+                '03'
+            ],
+            2 => [
+                '04',
+                '05',
+                '06'
+            ],
+            3 => [
+                '07',
+                '08',
+                '09'
+            ],
+            4 => [
+                '10',
+                '11',
+                '12'
+            ],
+        ];
+        $quarterConfigData = $quarterConfig[$quarter];
+        $monthArray = [];
+        foreach ($quarterConfigData as $monthName) {
+            $monthArray[] = "{$year}-{$monthName}";
+        }
+        return $monthArray;
+    }
+
+    /**
+     * 获取月份所属的季度
+     * @param $month
+     * @return mixed
+     */
+    public static function getMonthQuarter($month)
+    {
+        $month = strtotime($month);
+        $month = date("m", $month);
+        $month = (int)$month;
+        $quarterConfig = [
+            1 => 1,
+            2 => 1,
+            3 => 1,
+            4 => 2,
+            5 => 2,
+            6 => 2,
+            7 => 3,
+            8 => 3,
+            9 => 3,
+            10 => 4,
+            11 => 4,
+            12 => 4,
+        ];
+        return $quarterConfig[$month];
+    }
+
+    /**
+     * 获取一个月份所在季度拥有的月份
+     * @param $month
+     * @return array|bool
+     */
+    public static function getMonthQuarterMonths($month)
+    {
+        if (!strtotime($month)) {
+            return false;
+        }
+        $year = explode('-', $month)[0];
+        $quarter = self::getMonthQuarter($month);
+        $months = self::getQuarterMonths($year, $quarter);
+        return $months;
+    }
+
+    /**
+     * 获取一个时间段内的每周的时间组
+     * @param string $startTime
+     * @param string $endTime
+     * @param bool $hasWeekend
+     * @return array
+     */
+    public static function getWeekDateArray(string $startTime, string $endTime, $hasWeekend = true)
+    {
+        $dayS = 86400;
+        $time = strtotime($startTime);
+        $weekArray = [[]];
+        $weekDaysArray = [7, 1, 2, 3, 4, 5, 6];
+        while ($time <= strtotime($endTime)) {
+            $weekDay = date('w', $time);
+            $weekDay = $weekDaysArray[$weekDay];
+            if (($hasWeekend == true) || ($hasWeekend == false && $weekDay < 6)) {
+                $weekArray[count($weekArray) - 1][] = self::getYmdDate($time);
+            }
+
+            if ($weekDay >= 7) {
+                $weekArray[] = [];
+            }
+            $time += $dayS;
+        }
+        foreach ($weekArray as $key => $value) {
+            if (empty($value)) {
+                unset($weekArray[$key]);
+            }
+        }
+        return $weekArray;
+    }
+
+
+
+
+
 }

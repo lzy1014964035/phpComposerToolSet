@@ -17,7 +17,7 @@ trait ServiceStatisticalChart
         $sumNum = array_sum($data);
         $returnData = [];
         foreach ($data as $key => $num) {
-            $proportion = BaseService:: beDividedBy($num, $sumNum) * 100;
+            $proportion = ServiceMath:: beDividedBy($num, $sumNum) * 100;
             $setNum -= $proportion;
             $returnData[$key] = $proportion;
         }
