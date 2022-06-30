@@ -1,6 +1,6 @@
 <?php
 
-namespace lzy1014964035\PHPComposerToolSet\Service\Excel;
+namespace ToolSet\Service\Excel;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;

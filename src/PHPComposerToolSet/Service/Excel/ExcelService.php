@@ -1,6 +1,6 @@
 <?php
 
-namespace lzy1014964035\PHPComposerToolSet\Service\Excel;
+namespace ToolSet\Service\Excel;
 
 use App\Service\BaseService;
 use Maatwebsite\Excel\Facades\Excel;

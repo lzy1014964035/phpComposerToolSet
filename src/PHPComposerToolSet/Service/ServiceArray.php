@@ -1,6 +1,6 @@
 <?php
 
-namespace lzy1014964035\PHPComposerToolSet\Service;
+namespace ToolSet\Service;
 
 
 trait ServiceArray

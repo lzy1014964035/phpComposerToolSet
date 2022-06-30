@@ -1,7 +1,7 @@
 <?php
 
 
-namespace lzy1014964035\PHPComposerToolSet\Service\DingDing\DingDingSendMsg;
+namespace ToolSet\Service\DingDing\DingDingSendMsg;
 
 class DingDingSendMsgService
 {
