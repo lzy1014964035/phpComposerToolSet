@@ -4,6 +4,7 @@
 namespace ToolSet\Service\DingDing\DingDingSendMsg;
 
 use ToolSet\Service\ServiceBase;
+use Redis;
 
 class ServiceDingDingSendMsg
 {
@@ -13,6 +14,10 @@ class ServiceDingDingSendMsg
 
     ];
     private static $key = "b:";
+    // 注册redis服务
+    private static $redisObj = null;
+    // redis的健
+    private static $redisKey = "dingdingSendRedisKey";
 
     /**
      * 设置机器人组
@@ -24,12 +29,32 @@ class ServiceDingDingSendMsg
     }
 
     /**
-     * 设置
+     * 设置key
      * @param string $key
      */
     public static function setKey(string $key)
     {
         self::$key = $key;
+    }
+
+    /**
+     * 设置缓存
+     * @param $ip
+     * @param int $port
+     * @param string $password
+     * @return Redis
+     */
+    public static function setRedis($ip, $port = 6379, $password = null)
+    {
+        $redis = new Redis();
+        $redis->connect($ip, $port);
+        if($password){
+            $redis->auth($password);
+        }
+        self::$redisObj = $redis;
+
+        $redis->incr('');
+        $redis->expire('', 60);
     }
 
     /**
@@ -39,8 +64,27 @@ class ServiceDingDingSendMsg
      */
     private static function getWebHook()
     {
-        $time = time();
-        $key = $time % count(self::$webhook);
+        if(empty(self::$webhook)){
+            return false;
+        }
+
+        // 没有缓存的时候用时间戳做期望负载均衡
+        if( ! self::$redisObj){
+            $time = time();
+            $key = $time % count(self::$webhook);
+        }else{
+            // 有缓存的时候用缓存子增键做负载均衡
+            $setKey = self::$redisKey . ":" . date("Y-m-d_H_i");
+            $num = self::$redisObj->incr($setKey);
+            self::$redisObj->expire($setKey, 60);
+            // 因为钉钉限制机器人每分钟20条，所以这里做个限制。
+            if($num > count(self::$webhook) * 12){
+                return false;
+            }
+            $key = $num % count(self::$webhook);
+        }
+
+
         return self::$webhook[$key];
     }
 
