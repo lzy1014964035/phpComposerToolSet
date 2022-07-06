@@ -2,8 +2,6 @@
 
 namespace ToolSet\Service\Excel;
 
-
-
 use ToolSet\Service\ServiceBase;
 
 class ExportMany
@@ -37,10 +35,10 @@ class ExportMany
     public function download()
     {
         $setFieldName = $this->fieldName;
-        if(ServiceExcel::$fileHasDate == true){
+        if (ServiceExcel::$fileHasDate == true) {
             $setFieldName = $this->fieldName . ServiceBase::getYmdDate();
         }
-        if(ServiceExcel::$fileHasTime == true){
+        if (ServiceExcel::$fileHasTime == true) {
             $setFieldName = $this->fieldName . ServiceBase::getYmdHisDate();
         }
         $this->excelObject->downloadExcel($setFieldName);

@@ -14,7 +14,8 @@ class ServiceBase
     // 是否打印,一般是cli脚本才开启该参数
     public static $checkDump = false;
 
-    public static function requestInput(){
+    public static function requestInput()
+    {
         return null;
     }
 
@@ -178,7 +179,6 @@ class ServiceBase
     }
 
 
-
     /**
      * 判断是否是全部字段都为空
      * @param $data
@@ -234,7 +234,6 @@ class ServiceBase
     }
 
 
-
     /**
      * 打印
      * @param mixed ...$data
@@ -255,13 +254,10 @@ class ServiceBase
     public static function dd(...$data)
     {
         if (self::$checkDump === true) {
-            self::dump($data);die;
+            self::dump($data);
+            die;
         }
     }
-
-
-
-
 
 
 }

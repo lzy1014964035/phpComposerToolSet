@@ -48,7 +48,6 @@ trait ServiceTime
     }
 
 
-
     /***
      * 返回两个时间内所有的时间集合 单位：天
      * @param $startTime // 开始时间：2020-04-01
@@ -369,9 +368,6 @@ trait ServiceTime
         }
         return $weekArray;
     }
-
-
-
 
 
 }

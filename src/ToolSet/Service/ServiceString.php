@@ -174,7 +174,7 @@ trait ServiceString
      */
     public static function formatToNum($number, $decimals = null)
     {
-        if($decimals === null){
+        if ($decimals === null) {
             $decimals = self::$transformationDecimals;
         }
 
@@ -195,9 +195,9 @@ trait ServiceString
         if (strpos($str, "/") !== false) return 0;
 
         // 如果是负1就向下取整
-        if($decimals == -1){
+        if ($decimals == -1) {
             $num = floor($str);
-        }else{
+        } else {
             $num = round($str, $decimals);
         }
 
@@ -206,11 +206,11 @@ trait ServiceString
 
     public static function numToFormat($number, $decimals = null)
     {
-        if($decimals === null){
+        if ($decimals === null) {
             $decimals = self::$transformationDecimals;
         }
         // 如果是负1就向下取整
-        if($decimals == -1){
+        if ($decimals == -1) {
             return floor($number);
         }
         if (!empty($number) && is_numeric($number)) {

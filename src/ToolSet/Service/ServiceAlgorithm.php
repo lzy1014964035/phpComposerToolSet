@@ -13,19 +13,15 @@ trait ServiceAlgorithm
     public static function makeCartesianProduct(array $array)
     {
         $returnArray = [];
-        foreach($array as $field => $fieldValueArray)
-        {
-            if(empty($returnArray)){
-                foreach($fieldValueArray as $fieldValue)
-                {
+        foreach ($array as $field => $fieldValueArray) {
+            if (empty($returnArray)) {
+                foreach ($fieldValueArray as $fieldValue) {
                     $returnArray[] = [$field => $fieldValue];
                 }
-            }else{
+            } else {
                 $setReturnArray = [];
-                foreach($returnArray as $saveArray)
-                {
-                    foreach($fieldValueArray as $fieldValue)
-                    {
+                foreach ($returnArray as $saveArray) {
+                    foreach ($fieldValueArray as $fieldValue) {
                         $setSaveArray = $saveArray;
                         $setSaveArray[$field] = $fieldValue;
                         $setReturnArray[] = $setSaveArray;
