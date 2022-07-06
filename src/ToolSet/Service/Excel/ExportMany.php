@@ -18,9 +18,10 @@ class ExportMany
     }
 
     /**
-     * @param $sheetName
-     * @param $titleConfig
-     * @param $dataList
+     * 创建sheet页
+     * @param $sheetName // sheet页名称
+     * @param $titleConfig // 表头配置 例如 ['name' => '用户名', 'phone' => '手机号',...]
+     * @param $dataList // 内容列表 例如 [['name' => '张三', 'phone' => '13100000000'],['name' => '李四', 'phone' => '1320000000'],...]
      * @return Export
      */
     public function makeSheet($sheetName, $titleConfig, $dataList)
@@ -30,6 +31,7 @@ class ExportMany
     }
 
     /**
+     * 下载
      * @return Export
      */
     public function download()

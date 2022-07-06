@@ -4,6 +4,7 @@ namespace ToolSet\Service\Excel;
 
 use \PhpOffice\PhpSpreadsheet\Spreadsheet;
 use \PhpOffice\PhpSpreadsheet\IOFactory;
+use \PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 class Export
 {
@@ -31,12 +32,18 @@ class Export
         $fieldNum = 0;
         foreach($titleConfig as $fieldName)
         {
-
             $keyName = $this->getKeyName($fieldNum);
             //设置宽度为true,不然太窄了
-            $excel->getActiveSheet()->getColumnDimension($keyName)->setAutoSize(true);
+            $sheet->getDefaultColumnDimension()->setAutoSize(true);
             // 设置标题字段
             $sheet->setCellValue("{$keyName}1", $fieldName);
+            // 设置居中
+            $sheet->getStyle('A1:Z1265')->applyFromArray([
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    ]
+            ]);
 
             $fieldNum++;
         }

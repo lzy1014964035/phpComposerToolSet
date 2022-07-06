@@ -13,7 +13,7 @@ class ServiceExcel
 
     /**
      * 简单导出
-     * @param $fieldName
+     * @param $fieldName // 文件名称
      * @param $titleConfig // 表头配置 例如 ['name' => '用户名', 'phone' => '手机号',...]
      * @param $dataList // 内容列表 例如 [['name' => '张三', 'phone' => '13100000000'],['name' => '李四', 'phone' => '1320000000'],...]
      */
@@ -35,12 +35,12 @@ class ServiceExcel
 
     /**
      * 导出多个sheet页面
-     * @param $fieldName
+     * @param $fileName // 文件名称
      * @return ExportMany
      */
-    public static function exportMany($fieldName)
+    public static function exportMany($fileName)
     {
-        return new ExportMany($fieldName);
+        return new ExportMany($fileName);
     }
 
 
