@@ -43,7 +43,16 @@ class ServiceExcel
         return new ExportMany($fileName);
     }
 
-
+    /**
+     * 导入
+     * @param $fileData // 文件数据
+     * @param $sheetIndexOrName // sheet页面的下标
+     * @param $configData // 字段配置
+     * @param null $callbackFunction // 回调方法 function($rowItem, $rowNum)
+     * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     */
     public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null)
     {
         return Import::import($fileData, $sheetIndexOrName, $configData, $callbackFunction);
