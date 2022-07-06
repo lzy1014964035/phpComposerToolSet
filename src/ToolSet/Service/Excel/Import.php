@@ -3,10 +3,21 @@
 namespace ToolSet\Service\Excel;
 
 use \PhpOffice\PhpSpreadsheet\IOFactory;
+use \Exception;
+use ToolSet\Service\ServiceBase;
 
 class Import
 {
-    public static function import($fileData, $sheetNumOrName, $configData, $callbackFunction = null)
+    /**
+     * @param $fileData // 文件数据
+     * @param $sheetIndexOrName // sheet页面的下标
+     * @param $configData // 字段配置
+     * @param null $callbackFunction // 回调方法 function($rowItem, $rowNum)  
+     * @return array
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     */
+    public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null)
     {
         $fileSize = $fileData['size'];
         $fileExtendName = substr(strrchr($fileData["name"], '.'), 1);
@@ -21,10 +32,13 @@ class Import
 
             $filename = $fileData['tmp_name'];
             $objPHPExcel = $objReader->load($filename);  //$filename可以是上传的表格，或者是指定的表格
-            if(is_numeric($sheetNumOrName)){
-                $sheet = $objPHPExcel->getSheet($sheetNumOrName);   //excel中的第一张sheet
+            if(is_numeric($sheetIndexOrName)){
+                $sheet = $objPHPExcel->getSheet($sheetIndexOrName);   //excel中的第一张sheet
             }else{
-                $sheet = $objPHPExcel->getSheetByName($sheetNumOrName);
+                $sheet = $objPHPExcel->getSheetByName($sheetIndexOrName);
+                if($sheet === null){
+                    throw new Exception("excel导入失败 sheet页{{$sheetIndexOrName}}不存在");
+                }
             }
 
             // 转化成列表
@@ -46,17 +60,23 @@ class Import
             }
             $list = array_values($list);
 
-            $fieldConfig = [];
-            foreach($list[0] as $keyNum => $titleName)
-            {
-                if($titleName === null){
-                    break;
-                }
 
-                if(isset($configData[$titleName])){
-                    $field = $configData[$titleName];
-                    $fieldConfig[$field] = $keyNum;
+            $titleArray = $list[0];
+            foreach($titleArray as $key => $value)
+            {
+                if($value === null){
+                    unset($titleArray[$key]);
                 }
+            }
+
+            $titleArray = array_flip($titleArray);
+            $fieldConfig = [];
+            foreach($configData as $fieldName => $field)
+            {
+                if( ! isset($titleArray[$fieldName])){
+                    throw new Exception("excel导入失败 字段{{$fieldName}}再列中不存在");
+                }
+                $fieldConfig[$field] = $titleArray[$fieldName];
             }
 
             $returnList = [];

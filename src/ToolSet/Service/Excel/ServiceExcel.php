@@ -44,9 +44,9 @@ class ServiceExcel
     }
 
 
-    public static function import($fileData, $sheetNumOrName, $configData, $callbackFunction = null)
+    public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null)
     {
-        return Import::import($fileData, $sheetNumOrName, $configData, $callbackFunction);
+        return Import::import($fileData, $sheetIndexOrName, $configData, $callbackFunction);
     }
 
 
