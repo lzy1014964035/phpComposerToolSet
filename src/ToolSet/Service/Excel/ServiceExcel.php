@@ -44,6 +44,41 @@ class ServiceExcel
     }
 
 
+    public static function import($fileData, $sheetNumOrName, $configData, $callbackFunction = null)
+    {
+        return Import::import($fileData, $sheetNumOrName, $configData, $callbackFunction);
+    }
 
+
+    /**
+     * 根据key值获取对应的列标名称
+     * @param $key
+     * @return mixed|string
+     */
+    public static function getKeyName($key)
+    {
+        $keyArray = [
+            "A", "B", "C", "D", "E",
+            "F", "G", "H", "I", "J",
+            "K", "L", "M", "N", "O",
+            "P", "Q", "R", "S", "T",
+            "U", "V", "W", "X", "Y", "Z"
+        ];
+
+        // 最多计算到ZZ 再往后的就不计算了
+        $keyName = $key;
+        if ($key < 26) {
+            $keyName = $keyArray[$key];
+        } elseif ($key < 702) {
+            // 十位数向下取整得出
+            $tenFigures = floor($key / 26);
+            // 个位数取余数得下标
+            $singleDigit = $key % 26;
+
+            $keyName = $keyArray[$tenFigures - 1] . $keyArray[$singleDigit];
+        }
+
+        return $keyName;
+    }
 
 }

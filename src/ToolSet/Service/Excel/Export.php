@@ -32,7 +32,7 @@ class Export
         $fieldNum = 0;
         foreach($titleConfig as $fieldName)
         {
-            $keyName = $this->getKeyName($fieldNum);
+            $keyName = ServiceExcel::getKeyName($fieldNum);
             //设置宽度为true,不然太窄了
             $sheet->getDefaultColumnDimension()->setAutoSize(true);
             // 设置标题字段
@@ -49,13 +49,12 @@ class Export
         }
 
         // 设置内容
-
         foreach ($dataList as $key => $value) {
             $row = $key + 2;
             $fieldNum = 0;
             foreach($titleConfig as $field => $fieldName)
             {
-                $keyName = $this->getKeyName($fieldNum);
+                $keyName = ServiceExcel::getKeyName($fieldNum);
                 $sheet->setCellValue("{$keyName}{$row}", $value[$field]);
                 $fieldNum++;
             }
@@ -99,36 +98,7 @@ class Export
 
 
 
-    /**
-     * 根据key值获取对应的列标名称
-     * @param $key
-     * @return mixed|string
-     */
-    public function getKeyName($key)
-    {
-        $keyArray = [
-            "A", "B", "C", "D", "E",
-            "F", "G", "H", "I", "J",
-            "K", "L", "M", "N", "O",
-            "P", "Q", "R", "S", "T",
-            "U", "V", "W", "X", "Y", "Z"
-        ];
 
-        // 最多计算到ZZ 再往后的就不计算了
-        $keyName = $key;
-        if ($key < 26) {
-            $keyName = $keyArray[$key];
-        } elseif ($key < 702) {
-            // 十位数向下取整得出
-            $tenFigures = floor($key / 26);
-            // 个位数取余数得下标
-            $singleDigit = $key % 26;
-
-            $keyName = $keyArray[$tenFigures - 1] . $keyArray[$singleDigit];
-        }
-
-        return $keyName;
-    }
 
 
 }
