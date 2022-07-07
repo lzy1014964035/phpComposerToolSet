@@ -256,7 +256,9 @@ class ServiceBase
     public static function dd(...$data)
     {
         if (self::$checkDump === true) {
-            self::dump($data);
+            foreach($data as $v){
+                self::dump($v);
+            }
             die;
         }
     }
