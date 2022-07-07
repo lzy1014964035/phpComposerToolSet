@@ -241,9 +241,11 @@ class ServiceBase
     public static function dump(...$data)
     {
         if (self::$checkDump === true) {
+            echo "<pre>";
             foreach ($data as $dataValue) {
                 var_dump($dataValue);
             }
+            echo "</pre>";
         }
     }
 
