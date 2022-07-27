@@ -14,6 +14,11 @@ class ServiceBase
     // 是否打印,一般是cli脚本才开启该参数
     public static $checkDump = false;
 
+    public static function packTag()
+    {
+        return "1.0.2";
+    }
+
     public static function requestInput()
     {
         return null;
