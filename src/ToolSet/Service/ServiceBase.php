@@ -16,7 +16,7 @@ class ServiceBase
 
     public static function packTag()
     {
-        return "1.0.2";
+        return "1.0.3";
     }
 
     public static function requestInput()
