@@ -4,7 +4,6 @@ namespace ToolSet\Service\Mqtt;
 
 use \PhpMqtt\Client\MqttClient;
 use \PhpMqtt\Client\ConnectionSettings;
-use ToolSet\Service\ServiceBase;
 
 
 // 安装emqx的笔记
@@ -94,7 +93,7 @@ class ServiceMqtt
      * @throws \PhpMqtt\Client\Exceptions\ProtocolViolationException
      * @throws \PhpMqtt\Client\Exceptions\RepositoryException
      */
-    public function setService()
+    public function makeService()
     {
         foreach ($this->mqttSubscribeArray as $topic => $callback)
         {
