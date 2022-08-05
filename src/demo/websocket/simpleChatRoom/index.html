@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="set.js"></script>
+</head>
+<body>
+用户: <input type="text" name="username" value="zhangsan or lisi or wangwu">
+<br>
+密码: <input type="password" name="password" value="123456">
+<br>
+
+选择聊天室：
+<select name="room_id" onchange="updateUsersTalk()">
+</select>
+<br>
+<button onclick="login()">登录</button>
+<hr>
+用户昵称:<font id="nickname">未登录</font>
+<hr>
+<textarea name="text" cols="30" rows="10"></textarea>
+<button onclick="sendMsg()">发送</button>
+<hr>
+<div id="users_talk">
+
+</div>
+<hr>
+<div >
+    <div id="template_other_user_talk">
+        <div style="border: 1px solid green;width: 500px;">
+            <font style="color: green">{{nickname}}</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font>{{date}}</font>
+            <br>
+            <font>{{talkMessage}}</font>
+        </div>
+    </div>
+    <div id="template_my_talk">
+        <div style="border: 1px solid blue; width: 500px;">
+            <font style="color: blue;margin-left: 250px;">{{nickname}}</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font>{{date}}</font>
+            <br>
+            <font style="margin-left: 250px;">{{talkMessage}}</font>
+        </div>
+    </div>
+</div>
+
+
+</body>
+<script>
+
+    var userData = {};
+    var roomRecord = {};
+    // 创建个socket实例
+    websocket = getWsObj('ws://127.0.0.1:2346');
+
+    // 检查是否登录
+    function checkLogin(){
+        return userData == {} ? false : true;
+    }
+
+    // 登录
+    function login(){
+        let username = getDOCByName('username').value;
+        let password = getDOCByName('password').value;
+
+        // 向服务器发起登录动作，并发送登录时需要的数据
+        websocket.toPublishAction('user/login', {
+            username: username,
+            password: password,
+        });
+    }
+
+    // 设置监听登录后的返回的用户信息
+    websocket.setListenAction('afterLogin', function(data){
+        userData.token = data.token;
+        userData.nickname = data.nickname;
+        userData.rooms = data.rooms;
+
+        let htmlString = "";
+        userData.rooms.forEach(function(v){
+            let id = v['id'];
+            let name = v['name'];
+            let string = `<option value="${id}">${name}<\option>`;
+
+            htmlString = htmlString + string;
+        });
+        getDOCById('nickname').innerHTML = userData.nickname;
+        getDOCByName('room_id').innerHTML = htmlString;
+    });
+
+
+    // 发送数据
+    function sendMsg()
+    {
+        if( ! checkLogin()){
+            alert('请先登录');
+        }
+        let text = getDOCByName('text').value;
+        let roomId = getDOCByName('room_id').value;
+        websocket.toPublishAction('message/sendMsg', {
+            roomId: roomId,
+            text: text,
+        });
+    }
+
+    // 设置监听登录后的返回的用户信息
+    websocket.setListenAction('message/listenOtherMsg', function(data){
+        if( ! checkLogin()){
+            return;
+        }
+        let roomId = data.room_id;
+        let nickname = data.nickname;
+        let talkMessage = data.talkMessage;
+        let date = data.date;
+        if(! roomRecord[roomId]){
+            roomRecord[roomId] = [];
+        }
+        roomRecord[roomId].push({
+            date: date,
+            nickname: nickname,
+            talkMessage: talkMessage,
+        });
+
+        updateUsersTalk();
+    });
+
+    // 更新用户的对话信息
+    function updateUsersTalk(){
+        if( ! checkLogin()){
+            return;
+        }
+        let roomId = getDOCByName('room_id').value;
+        if( ! roomRecord[roomId]){
+            return;
+        }
+
+        // 倒序排列
+        roomRecord.reverse();
+
+        let showHtmlString = "";
+        let num = 1;
+
+        roomRecord.forEach(function(v){
+            // 最多显示三十条
+            if(num <= 30){
+                let htmlString;
+                if(v.nickname == userData.nickname){
+                    htmlString = simpleTemplateDeal('template_my_talk', v);
+                }else{
+                    htmlString = simpleTemplateDeal('template_other_user_talk', v);
+                }
+                showHtmlString = htmlString + showHtmlString;
+            }
+            num++;
+        });
+
+        getDOCById('users_talk').innerHTML = showHtmlString;
+    }
+
+
+</script>
+</html>
