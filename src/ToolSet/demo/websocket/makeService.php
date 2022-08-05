@@ -23,7 +23,7 @@ $service->onMessage(function($con, $data) use (&$usernameArray) {
     ]);
     // 通过指针选择资源发送信息
     ServiceWebSocket::send($usernameArray['admin'], [
-        'msg' =>'通过指针选择链接资源进行通讯-return'
+        'msg' =>'通过指针选择链接资源进行通讯-return' . ServiceBase::emptyDefault($data['msg']).'-return'
     ]);
 });
 $service->onClose(function($con) use (&$usernameArray){
