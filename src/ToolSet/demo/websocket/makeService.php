@@ -12,7 +12,7 @@ $service->onConnect(function($con) use (&$usernameArray){
     $userName = 'admin';
     $con->otherData = ['username' => $userName];
     $usernameArray[$userName] = $con;
-    var_dump($usernameArray);
+    var_dump("新连接用户,当前链接数:" . count($usernameArray[$userName]));
 });
 $service->onMessage(function($con, $data) use (&$usernameArray) {
     var_dump($data);
