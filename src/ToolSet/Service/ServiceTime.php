@@ -369,5 +369,25 @@ trait ServiceTime
         return $weekArray;
     }
 
+    /**
+     * 获取微妙的级时间戳
+     * @return float
+     */
+    public static function getMicrosecondsTime(){
+        list($usec, $sec) = explode(" ", microtime());
+        return ((float)$usec + (float)$sec);
+    }
+
+    /**
+     * 获取最后的时间记录差
+     */
+    private static $lastTimeRecord = null;
+    public static function getLastTimeRecordDifference()
+    {
+        $now = self::getMicrosecondsTime();
+        $diff = self::$lastTimeRecord ? $now - self::$lastTimeRecord : false;
+        self::$lastTimeRecord = $now;
+        return $diff;
+    }
 
 }
