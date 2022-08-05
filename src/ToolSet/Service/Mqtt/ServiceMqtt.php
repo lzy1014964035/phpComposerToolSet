@@ -17,9 +17,8 @@ class ServiceMqtt
     private $mqttObject = null;
     private $mqttSubscribeArray = [];
 
-    public function __construct($server, $port = 1883, $userName = "emqx_user", $password = null, $clientId = null)
+    public function __construct($server, $port = 1883, $userName = "", $password = null, $clientId = null)
     {
-        $clientId = $clientId ?: rand(5, 15);
         $clean_session = false;
 
         $connectionSettings  = new ConnectionSettings();
