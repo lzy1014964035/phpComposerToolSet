@@ -6,7 +6,7 @@ use Workerman\Worker;
 use Workerman\Mqtt\Client;
 
 // 笔记
-// https://www.jianshu.com/p/ff23efbbf272
+// https://blog.csdn.net/Simplegif/article/details/124568405
 
 class ServiceMqttByWorker
 {
@@ -27,40 +27,48 @@ class ServiceMqttByWorker
     public static function getSingleCase($server, $port = 1883, $userName = "emqx_user", $password = null, $clientId = null)
     {
         if( ! self::$singleCase){
-            self::$singleCase = new ServiceMqtt($server, $port, $userName, $password, $clientId);
+            self::$singleCase = new self($server, $port, $userName, $password, $clientId);
         }
         return self::$singleCase;
     }
 
-
+    /**
+     * 构建函数
+     * ServiceMqttByWorker constructor.
+     * @param $server
+     * @param int $port
+     * @param string $userName
+     * @param null $password
+     * @param null $clientId
+     */
     public function __construct($server, $port = 1883, $userName = "emqx_user", $password = null, $clientId = null)
     {
+        // workerman的推送不方便，所以用另一个组件进行推送
         $this->publishObj = new ServiceMqtt($server, $port, $userName, $password, $clientId);
+        // 保存初始化回调
         $this->onWorkerStart = function () use ($port, $server, $userName, $password, $clientId){
-            if( ! $clientId){
-                $clientId = rand(0, 100000) . time();
-            }
-            $options = [
-                'keepalive' => 60,
-                'clean_session' => true,
-                'client_id' => $clientId,
-                'debug' => true,
-                'username' => $userName,
-                'password' => $password,
-            ];
-
+//            if( ! $clientId){
+//                $clientId = rand(0, 100000) . time();
+//            }
 //            $options = [
+//                'keepalive' => 60,
+//                'clean_session' => true,
+//                'client_id' => $clientId,
+//                'debug' => true,
+//                'username' => $userName,
+//                'password' => $password,
 //                'ssl' => [
 //                    'local_pk' => './mqtt_ssl/privkey.pem',
 //                    'verify_peer' => false,
 //                ],
 //            ];
-
+            
             $clicke = "mqtt://{$server}:{$port}";
 
 //            $mqtt = new Client($clicke, $options);
             $mqtt = new Client($clicke);
 
+            // 链接时对注册的主题组进行订阅
             $mqtt->onConnect = function($mqtt) {
                 $topicArray = array_keys($this->mqttSubscribeArray);
                 foreach($topicArray as $topic){
@@ -68,6 +76,7 @@ class ServiceMqttByWorker
                 }
             };
 
+            // 接收信息时，根据主题执行不同的回调
             $mqtt->onMessage = function($topic, $message){
                 if( ! isset($this->mqttSubscribeArray[$topic])){
                     return;

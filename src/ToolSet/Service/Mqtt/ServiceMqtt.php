@@ -50,7 +50,7 @@ class ServiceMqtt
     public static function getSingleCase($server, $port = 1883, $userName = "emqx_user", $password = null, $clientId = null)
     {
         if( ! self::$singleCase){
-            self::$singleCase = new ServiceMqtt($server, $port, $userName, $password, $clientId);
+            self::$singleCase = new self($server, $port, $userName, $password, $clientId);
         }
         return self::$singleCase;
     }
