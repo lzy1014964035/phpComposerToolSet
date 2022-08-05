@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<textarea name="" id="text" cols="30" rows="10"></textarea>
+<button onclick="sendMsg()">发送</button>
+</body>
+<script>
+    // 监听
+    WebSocket.prototype.listen = function(callback){
+        this.addEventListener('message', function(msg){
+            let data = msg.data;
+            // 字符串转json
+            try {
+                data = JSON.parse(data);
+            } catch(e) {
+                data = null;
+            }
+            msg.data = data;
+
+            callback(data, msg.data, msg);
+        });
+    };
+    // 推送
+    WebSocket.prototype.sendJson = function(sendData){
+
+        // json转字符串
+        if(typeof sendData == 'object'){
+            sendData = JSON.stringify(sendData);
+        }
+
+        this.send(sendData);
+    };
+
+    var websocket = new WebSocket('ws://127.0.0.1:2346');
+    // 监听
+    websocket.listen(function(data){
+        console.log(data);
+    });
+    // 推送
+    function sendMsg(){
+        let data = document.getElementById('text').value;
+        websocket.sendJson({'name': "张三", "msg": data})
+    }
+</script>
+</html>
