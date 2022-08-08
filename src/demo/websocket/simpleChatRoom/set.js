@@ -18,6 +18,22 @@ WebSocket.prototype.toPublishAction = function(action_sign, param){
     };
     this.sendJson(sendData);
 };
+// 获取静态
+WebSocket.prototype.getWsStaticData = function(key){
+    if( ! WebSocket.otherStaticData){
+        return null;
+    }
+    return WebSocket.otherStaticData[key];
+};
+// 设置静态数据
+WebSocket.prototype.setWsStaticData = function(key, value){
+    if( ! WebSocket.otherStaticData){
+        WebSocket.otherStaticData = {};
+    }
+    WebSocket.otherStaticData[key] = value;
+};
+
+
 // 设置监听动作
 WebSocket.prototype.listenActionArray = {}; // 设置的动作组
 WebSocket.prototype.isAddEventListener = false; // 是否初始化监听者
@@ -55,7 +71,40 @@ WebSocket.prototype.setListenAction = function(action_sign, callback){
 // 再套成壳，挂载一些通用的监听动作
 // 是的新实力
 function getWsObj(serviceAddress){
-    var websocket = new WebSocket(serviceAddress);
+    let websocket = new WebSocket(serviceAddress);
+    if( ! WebSocket.otherStaticData){
+        WebSocket.otherStaticData = {};
+    }
+
+    websocket.onopen = function(){
+        let userData = this.getWsStaticData('userData');
+        if(userData){
+            let userToken = userData['token'];
+            websocket.toPublishAction('user/dar', {
+                token: userToken
+            });
+        }
+    };
+
+    let reconnection = false;
+    websocket.onclose = function(){
+        console.log('服务器已经断开');
+        if(reconnection){
+            return;
+        }
+        setTimeout(function(){
+            websocket = getWsObj(serviceAddress);
+        }, 2000);
+    };
+    websocket.onerror = function(err){
+        console.log(`服务器报错：${err}`);
+        if(reconnection){
+            return;
+        }
+        setTimeout(function(){
+            websocket = getWsObj(serviceAddress);
+        }, 2000);
+    };
 
     // 监听
     websocket.setListenAction('alterMsg', function(data, msg){
@@ -64,6 +113,7 @@ function getWsObj(serviceAddress){
 
     return websocket;
 };
+
 
 
 // 设置部分要用到的方法

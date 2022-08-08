@@ -5,10 +5,10 @@ require "vendor/autoload.php";
 use ToolSet\Service\WebSocket\ServiceWebSocket;
 use ToolSet\Service\ServiceBase;
 
-class xxxxxService
+class WsService
 {
     // 假设一个用户组
-    private static $users = [
+    public static $users = [
         [
             'username' => 'zhangsan',
             'password' => '123456',
@@ -53,7 +53,7 @@ class xxxxxService
     private static $actionRoutes = [];
 
     private static $WSServiceObj = null;
-    private static $userConnectionPool = [];
+    public static $userConnectionPool = [];
 
     /**
      * 发送
@@ -89,9 +89,11 @@ class xxxxxService
     public static function setAllRoute()
     {
         // 登录
-        self::setRoute('user/login', function($con, $param){ self::login($con, $param); });
+        self::setRoute('user/login', function($con, $param){ route::login($con, $param); });
+        // 断线重连
+        self::setRoute('user/dar', function($con, $param){ route::dar($con, $param); });
         // 用户发送数据
-        self::setRoute('message/sendMsg', function($con, $param){ self::userSendMsg($con, $param); });
+        self::setRoute('message/sendMsg', function($con, $param){ route::userSendMsg($con, $param); });
     }
 
     /**
@@ -105,54 +107,12 @@ class xxxxxService
     }
 
     /**
-     * 发起登录
-     * @param $con
-     * @param $param
-     */
-    public static function login($con, $param){
-        $username = $param['username'];
-        $password = $param['password'];
-
-        // 转成key类型进行操作
-        $users = ServiceBase::arrayKeyMakeData(self::$users, 'username');
-
-        $userData = isset($users[$username]) ? $users[$username] : null;
-
-        if( ! $userData){
-            self::sendAlertMsg($con, '找不到该用户名');
-            return;
-        }
-
-        if(isset(self::$userConnectionPool[$username])){
-            self::sendAlertMsg($con, '该用户已经登录，不可重复登录');
-            return;
-        }
-
-        if($userData['password'] != $password){
-            self::sendAlertMsg($con, '密码不正确');
-            return;
-        }
-
-        $con->otherData['userData'] = $userData;
-
-        self::$userConnectionPool[$username] = $con;
-
-        // 发送请求
-        self::send($con, 'afterLogin', [
-            'nickname' => $userData['nickname'],
-            'token' => $userData['token'],
-            'rooms' => $userData['rooms'],
-        ]);
-    }
-
-    private static $getRoomsUserCacheTime = 0;
-    private static $getRoomsUserCache = [];
-
-    /**
      * 获取聊天室的用户
      * @param $reqRoomId
      * @return mixed
      */
+    private static $getRoomsUserCacheTime = 0;
+    private static $getRoomsUserCache = [];
     public static function getRoomsUser($reqRoomId)
     {
         // 正常来讲不是一次查出全部，而是查出对应聊天室的用户都有谁
@@ -170,34 +130,6 @@ class xxxxxService
         }
         return self::$getRoomsUserCache[$reqRoomId];
     }
-
-    // 用户发送聊天信息
-    public static function userSendMsg($con, $param){
-        $userData = $con->otherData['userData'];
-        $roomId = $param['roomId'];
-        $text = $param['text'];
-
-        // 给聊天室里的每个人都发
-        $roomUsers = self::getRoomsUser($roomId);
-
-        foreach($roomUsers as $user){
-            $username = $user['username'];
-            if( ! isset(self::$userConnectionPool[$username])){
-                continue;
-            }
-
-            $con = self::$userConnectionPool[$username];
-
-            // 发送请求
-            self::send($con, 'message/listenOtherMsg', [
-                'room_id' => $roomId,
-                'nickname' => $userData['nickname'],
-                'talkMessage' => $text,
-                'date' => ServiceBase::getYmdHisDate(),
-            ]);
-        };
-    }
-
 
     public static function makeService(){
         $service = new ServiceWebSocket();
@@ -234,4 +166,99 @@ class xxxxxService
 
 }
 
-xxxxxService::makeService();
+class route{
+
+    /**
+     * 给用户绑定链接
+     * @param $con
+     * @param $userData
+     */
+    private static function bindUserForCon($con, $userData)
+    {
+        $con->otherData['userData'] = $userData;
+        $username = $userData['username'];
+        WsService::$userConnectionPool[$username] = $con;
+    }
+
+    /**
+     * 发起登录
+     * @param $con
+     * @param $param
+     */
+    public static function login($con, $param){
+        $username = $param['username'];
+        $password = $param['password'];
+
+        // 转成key类型进行操作
+        $users = ServiceBase::arrayKeyMakeData(WsService::$users, 'username');
+
+        $userData = isset($users[$username]) ? $users[$username] : null;
+
+        if( ! $userData){
+            WsService::sendAlertMsg($con, '找不到该用户名');
+            return;
+        }
+
+        if(isset(WsService::$userConnectionPool[$username])){
+            WsService::sendAlertMsg($con, '该用户已经登录，不可重复登录');
+            return;
+        }
+
+        if($userData['password'] != $password){
+            WsService::sendAlertMsg($con, '密码不正确');
+            return;
+        }
+
+        self::bindUserForCon($con, $userData);
+
+
+        // 发送请求
+        WsService::send($con, 'afterLogin', [
+            'nickname' => $userData['nickname'],
+            'token' => $userData['token'],
+            'rooms' => $userData['rooms'],
+        ]);
+    }
+
+    // 用户发送聊天信息
+    public static function userSendMsg($con, $param){
+        $userData = $con->otherData['userData'];
+        $roomId = $param['roomId'];
+        $text = $param['text'];
+
+        // 给聊天室里的每个人都发
+        $roomUsers = WsService::getRoomsUser($roomId);
+
+        foreach($roomUsers as $user){
+            $username = $user['username'];
+            if( ! isset(WsService::$userConnectionPool[$username])){
+                continue;
+            }
+
+            $con = WsService::$userConnectionPool[$username];
+
+            // 发送请求
+            WsService::send($con, 'message/listenOtherMsg', [
+                'room_id' => $roomId,
+                'nickname' => $userData['nickname'],
+                'talkMessage' => $text,
+                'date' => ServiceBase::getYmdHisDate(),
+            ]);
+        };
+    }
+
+    // 断线重连
+    public static function dar($con, $param){
+        $token = $param['token'];
+        $tokenUsers = ServiceBase::arrayKeyMakeData(WsService::$users, 'token');
+        $userData = ServiceBase::emptyDefault($tokenUsers[$token], null);
+  
+        if($userData){
+            self::bindUserForCon($con, $userData);
+        }else{
+            WsService::sendAlertMsg($con, '断线重连失败');
+        }
+    }
+}
+
+WsService::makeService();

@@ -77,6 +77,7 @@
         userData.token = data.token;
         userData.nickname = data.nickname;
         userData.rooms = data.rooms;
+        websocket.setWsStaticData('userData', userData);
 
         let htmlString = "";
         userData.rooms.forEach(function(v){
