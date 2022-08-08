@@ -29,17 +29,17 @@
 
 </div>
 <hr>
-<div >
+<div style="display: none">
     <div id="template_other_user_talk">
         <div style="border: 1px solid green;width: 500px;">
-            <font style="color: green">{{nickname}}</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font>{{date}}</font>
+            <font style="color: green">{{nickname}}:</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font>{{date}}</font>
             <br>
             <font>{{talkMessage}}</font>
         </div>
     </div>
     <div id="template_my_talk">
         <div style="border: 1px solid blue; width: 500px;">
-            <font style="color: blue;margin-left: 250px;">{{nickname}}</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font>{{date}}</font>
+            <font style="color: blue;margin-left: 250px;">{{nickname}}:</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font>{{date}}</font>
             <br>
             <font style="margin-left: 250px;">{{talkMessage}}</font>
         </div>
@@ -137,24 +137,25 @@
         }
 
         // 倒序排列
-        roomRecord.reverse();
+        // roomRecord[roomId].reverse();
 
         let showHtmlString = "";
         let num = 1;
 
-        roomRecord.forEach(function(v){
+        for(let key in roomRecord[roomId]){
+            let value = roomRecord[roomId][key];
             // 最多显示三十条
             if(num <= 30){
                 let htmlString;
-                if(v.nickname == userData.nickname){
-                    htmlString = simpleTemplateDeal('template_my_talk', v);
+                if(value.nickname == userData.nickname){
+                    htmlString = simpleTemplateDeal('template_my_talk', value);
                 }else{
-                    htmlString = simpleTemplateDeal('template_other_user_talk', v);
+                    htmlString = simpleTemplateDeal('template_other_user_talk', value);
                 }
                 showHtmlString = htmlString + showHtmlString;
             }
             num++;
-        });
+        }
 
         getDOCById('users_talk').innerHTML = showHtmlString;
     }

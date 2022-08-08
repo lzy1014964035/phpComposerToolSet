@@ -63,6 +63,9 @@ class xxxxxService
      * @param string $msg
      */
     public static function send($con, $actionSign, $data = [], $msg = ""){
+        var_dump([
+            '推送动作' => $actionSign,
+        ]);
         ServiceWebSocket::send($con, [
             'msg' => $msg,
             'data' => $data,
@@ -132,7 +135,7 @@ class xxxxxService
 
         $con->otherData['userData'] = $userData;
 
-        self::$userConnectionPool[$username] = $userData;
+        self::$userConnectionPool[$username] = $con;
 
         // 发送请求
         self::send($con, 'afterLogin', [
@@ -147,10 +150,10 @@ class xxxxxService
 
     /**
      * 获取聊天室的用户
-     * @param $roomId
+     * @param $reqRoomId
      * @return mixed
      */
-    public static function getRoomsUser($roomId)
+    public static function getRoomsUser($reqRoomId)
     {
         // 正常来讲不是一次查出全部，而是查出对应聊天室的用户都有谁
         if(time() - self::$getRoomsUserCacheTime > round(30, 60)){
@@ -159,13 +162,13 @@ class xxxxxService
             {
                 foreach($user['rooms'] as $value)
                 {
-                    $roomId = $value['roomId'];
+                    $roomId = $value['id'];
                     $setArray[$roomId][] = $user;
                 }
             }
             self::$getRoomsUserCache = $setArray;
         }
-        return self::$getRoomsUserCache[$roomId];
+        return self::$getRoomsUserCache[$reqRoomId];
     }
 
     // 用户发送聊天信息
@@ -190,7 +193,7 @@ class xxxxxService
                 'room_id' => $roomId,
                 'nickname' => $userData['nickname'],
                 'talkMessage' => $text,
-                'date' => ServiceBase::getYmdDate(),
+                'date' => ServiceBase::getYmdHisDate(),
             ]);
         };
     }
@@ -208,6 +211,9 @@ class xxxxxService
         $service->onMessage(function($con, $data) use (&$usernameArray) {
             $actionSign = $data['actionSign'];
             $param = $data['param'];
+            var_dump([
+                '执行动作' => $actionSign,
+            ]);
 //            var_dump($actionSign, $param, $data);
             if( ! self::$actionRoutes[$actionSign]){
                 self::sendAlertMsg($con, "执行失败，动作“{$actionSign}”未定义");

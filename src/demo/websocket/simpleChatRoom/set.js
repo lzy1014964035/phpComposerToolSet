@@ -76,10 +76,11 @@ function getDOCById(id){
 // 简单模板处理
 function simpleTemplateDeal(domId, param)
 {
-    let htmlString = getDOCById(domId);
-    param.forEach(function(k, v){
-        let key = `{{${k}}}`;
-        htmlString.replace(key, v);
-    });
+    let htmlString = getDOCById(domId).innerHTML;
+    for(let key in param){
+        let value = param[key];
+        let keyString = `{{${key}}}`;
+        htmlString = htmlString.replace(keyString, value);
+    }
     return htmlString;
 }
