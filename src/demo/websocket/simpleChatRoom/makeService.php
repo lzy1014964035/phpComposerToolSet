@@ -13,7 +13,7 @@ class WsService
             'username' => 'zhangsan',
             'password' => '123456',
             'nickname' => '张三',
-            'token'  => '张三的token',
+            'token' => '张三的token',
             'rooms' => [ // 拥有的聊天室权限
                 [
                     'id' => 'room1',
@@ -29,7 +29,7 @@ class WsService
             'username' => 'lisi',
             'password' => '123456',
             'nickname' => '李四',
-            'token'  => '李四的token',
+            'token' => '李四的token',
             'rooms' => [
                 [
                     'id' => 'room1',
@@ -41,7 +41,7 @@ class WsService
             'username' => 'wangwu',
             'password' => '123456',
             'nickname' => '王五',
-            'token'  => '王五的token',
+            'token' => '王五的token',
             'rooms' => [
                 [
                     'id' => 'room2',
@@ -54,6 +54,7 @@ class WsService
 
     private static $WSServiceObj = null;
     public static $userConnectionPool = [];
+    public static $tokenConnectionPool = [];
 
     /**
      * 发送
@@ -91,7 +92,7 @@ class WsService
         // 登录
         self::setRoute('user/login', function($con, $param){ route::login($con, $param); });
         // 断线重连
-        self::setRoute('user/dar', function($con, $param){ route::dar($con, $param); });
+        self::setRoute('user/DAR', function($con, $param){ route::dar($con, $param); });
         // 用户发送数据
         self::setRoute('message/sendMsg', function($con, $param){ route::userSendMsg($con, $param); });
     }
@@ -168,16 +169,24 @@ class WsService
 
 class route{
 
-    /**
-     * 给用户绑定链接
-     * @param $con
-     * @param $userData
-     */
+    // 给用户绑定链接
     private static function bindUserForCon($con, $userData)
     {
         $con->otherData['userData'] = $userData;
         $username = $userData['username'];
         WsService::$userConnectionPool[$username] = $con;
+    }
+    // 发送用户信息到客户端
+    private static function sendUserDataToCli($con)
+    {
+        $userData = $con->otherData['userData'];
+
+        // 发送请求
+        WsService::send($con, 'afterLogin', [
+            'nickname' => $userData['nickname'],
+            'token' => $userData['token'],
+            'rooms' => $userData['rooms'],
+        ]);
     }
 
     /**
@@ -210,14 +219,7 @@ class route{
         }
 
         self::bindUserForCon($con, $userData);
-
-
-        // 发送请求
-        WsService::send($con, 'afterLogin', [
-            'nickname' => $userData['nickname'],
-            'token' => $userData['token'],
-            'rooms' => $userData['rooms'],
-        ]);
+        self::sendUserDataToCli($con);
     }
 
     // 用户发送聊天信息
@@ -252,9 +254,10 @@ class route{
         $token = $param['token'];
         $tokenUsers = ServiceBase::arrayKeyMakeData(WsService::$users, 'token');
         $userData = ServiceBase::emptyDefault($tokenUsers[$token], null);
-  
+
         if($userData){
             self::bindUserForCon($con, $userData);
+            self::sendUserDataToCli($con);
         }else{
             WsService::sendAlertMsg($con, '断线重连失败');
         }

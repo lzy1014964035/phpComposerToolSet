@@ -53,7 +53,7 @@
     var userData = {};
     var roomRecord = {};
     // 创建个socket实例
-    websocket = getWsObj('ws://127.0.0.1:2346');
+    websocket = makeWsService('ws://127.0.0.1:2346');
 
     // 检查是否登录
     function checkLogin(){
@@ -77,7 +77,7 @@
         userData.token = data.token;
         userData.nickname = data.nickname;
         userData.rooms = data.rooms;
-        websocket.setWsStaticData('userData', userData);
+        websocket.setStaticData('userData', userData);
 
         let htmlString = "";
         userData.rooms.forEach(function(v){
