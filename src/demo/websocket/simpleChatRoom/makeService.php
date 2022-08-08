@@ -124,7 +124,7 @@ class WsService
         $service = new ServiceWebSocket();
         self::$WSServiceObj = $service;
         $service->onConnect(function($con) use (&$usernameArray){
-            var_dump("新连接用户");
+            var_dump("新的链接");
         });
         // 设置挂载回调
         $service->onMessage(function($con, $data) use (&$usernameArray) {
