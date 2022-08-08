@@ -2,12 +2,10 @@
 // 封装websocket的原型链 优化操作方案，框架化处理
 // 推送
 WebSocket.prototype.sendJson = function(sendData){
-
     // json转字符串
     if(typeof sendData == 'object'){
         sendData = JSON.stringify(sendData);
     }
-    console.log('发送请求', sendData);
     this.send(sendData);
 };
 // 执行推送动作
@@ -27,12 +25,26 @@ WebSocket.prototype.toPublishAction = function(action_sign, param){
 function makeWsService(serviceAddress){
 
     this.debugConfig = false;
+    this.wsObj = null;
+
+    // 检查ws对象
+    this.checkWsObj = function(){
+        if(this.wsObj){
+            return true;
+        }
+        return false;
+    };
 
     // 发送数据
     this.sendJson = function(sendData){
+        if( ! this.checkWsObj())return;
         this.wsObj.sendJson(sendData);
     };
     this.toPublishAction = function(action_sign, param){
+        if( ! this.checkWsObj())return;
+        if(this.debugConfig) {
+            console.log('发送请求', action_sign, param);
+        }
         this.wsObj.toPublishAction(action_sign, param);
     };
     // 监听请求
@@ -57,10 +69,18 @@ function makeWsService(serviceAddress){
 
 
     // 创造ws对象
-    this.wsObj = '';
     this.makeWsObj = function(){
         let that = this;
+        // 删除
+        if(that.wsObj){
+            delete that.wsObj;
+        }
         let websocket = new WebSocket(serviceAddress);
+
+        if( ! websocket){
+            return;
+        }
+
         // 设置监听
         websocket.addEventListener('message', function(msg){
             let data = msg.data;
@@ -69,9 +89,7 @@ function makeWsService(serviceAddress){
                 data = JSON.parse(data);
             } catch(e) {
                 data = null;
-                if(that.debugConfig) {
-                    console.log('该次返回的数据不是json');
-                }
+                if(that.debugConfig)console.log('该次返回的数据不是json');
                 return;
             }
 
@@ -80,15 +98,11 @@ function makeWsService(serviceAddress){
             let param = data.data;
             // 如果存在对应动作的闭包，则执行
             if(that.listenActionArray[action_sign]){
-                if(that.debugConfig){
-                    console.log("执行动作", action_sign, data);
-                }
+                if(that.debugConfig)console.log("执行动作", action_sign, data);
 
                 that.listenActionArray[action_sign](param, message, data, msg);
             }else{
-                if(that.debugConfig) {
-                    console.log(`不存在动作“${action_sign}”`);
-                }
+                if(that.debugConfig)console.log(`不存在动作“${action_sign}”`);
                 return;
             }
         });
@@ -105,10 +119,9 @@ function makeWsService(serviceAddress){
 
         // 重连
         let reconnection = false;
-        websocket.onclose = function(){
-            if(that.debugConfig) {
-                console.log('服务器已经断开');
-            }
+        websocket.onclose = function(data){
+            console.log(data);
+            if(that.debugConfig)console.log('链接服务器已断开');
             if(reconnection){
                 return;
             }
@@ -117,15 +130,7 @@ function makeWsService(serviceAddress){
             }, 2000);
         };
         websocket.onerror = function(err){
-            if(that.debugConfig) {
-                console.log(`服务器报错：${err}`);
-            }
-            if(reconnection){
-                return;
-            }
-            setTimeout(function(){
-                that.makeWsObj(serviceAddress);
-            }, 2000);
+            if(that.debugConfig)console.log(`链接服务器异常`, err);
         };
 
         // 监听

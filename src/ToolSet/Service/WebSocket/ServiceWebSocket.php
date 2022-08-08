@@ -29,7 +29,6 @@ class ServiceWebSocket
             $callbackFunction($connection);
             $connection->conId = ++self::$connectionId;
             $connectionPool[$connection->conId] = $connection;
-            self::send($connection, ['id' => $connection->conId, 'msg' => "链接成功"]);
         };
     }
 

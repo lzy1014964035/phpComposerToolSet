@@ -54,6 +54,7 @@
     var roomRecord = {};
     // 创建个socket实例
     websocket = makeWsService('ws://127.0.0.1:2346');
+    websocket.debugConfig = true;
 
     // 检查是否登录
     function checkLogin(){
