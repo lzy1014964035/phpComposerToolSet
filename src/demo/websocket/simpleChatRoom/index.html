@@ -83,10 +83,12 @@
         userData.rooms.forEach(function(v){
             let id = v['id'];
             let name = v['name'];
-            let string = `<option value="${id}">${name}<\option>`;
 
-            htmlString = htmlString + string;
+            let string = `<option value="${id}">${name}<\option> `;
+
+            htmlString += string;
         });
+
         getDOCById('nickname').innerHTML = userData.nickname;
         getDOCByName('room_id').innerHTML = htmlString;
     });

@@ -167,6 +167,7 @@ class WsService
 
 }
 
+// 路由
 class route{
 
     // 给用户绑定链接
@@ -189,11 +190,7 @@ class route{
         ]);
     }
 
-    /**
-     * 发起登录
-     * @param $con
-     * @param $param
-     */
+    // 发起登录
     public static function login($con, $param){
         $username = $param['username'];
         $password = $param['password'];
