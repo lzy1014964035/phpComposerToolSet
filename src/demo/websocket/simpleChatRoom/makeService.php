@@ -84,18 +84,6 @@ class WsService
         self::send($con, 'alterMsg', [], $msg);
     }
 
-    /**
-     *  设置所有的路由
-     */
-    public static function setAllRoute()
-    {
-        // 登录
-        self::setRoute('user/login', function($con, $param){ route::login($con, $param); });
-        // 断线重连
-        self::setRoute('user/DAR', function($con, $param){ route::dar($con, $param); });
-        // 用户发送数据
-        self::setRoute('message/sendMsg', function($con, $param){ route::userSendMsg($con, $param); });
-    }
 
     /**
      * 设置路由
@@ -138,8 +126,6 @@ class WsService
         $service->onConnect(function($con) use (&$usernameArray){
             var_dump("新连接用户");
         });
-        // 设置路由
-        self::setAllRoute();
         // 设置挂载回调
         $service->onMessage(function($con, $data) use (&$usernameArray) {
             $actionSign = $data['actionSign'];
@@ -151,10 +137,32 @@ class WsService
             if( ! self::$actionRoutes[$actionSign]){
                 self::sendAlertMsg($con, "执行失败，动作“{$actionSign}”未定义");
             }
-            if( ! is_callable(self::$actionRoutes[$actionSign])){
-                self::sendAlertMsg($con, "执行失败，动作“{$actionSign}”为无效定义的动作");
+            if(is_callable(self::$actionRoutes[$actionSign])){
+                self::$actionRoutes[$actionSign]($con, $param);
+            }else if(is_string(self::$actionRoutes[$actionSign]) && strpos(self::$actionRoutes[$actionSign], '@')){
+
+                $actionFunctionString = self::$actionRoutes[$actionSign];
+                var_dump('反射路由' . $actionFunctionString);
+
+                // 拆解反射路由
+                $actionFunctionArray = explode('@', $actionFunctionString);
+                $className = $actionFunctionArray[0];
+                $functionName = $actionFunctionArray[1];
+
+                // 检查方法类型
+                $functionObj = new ReflectionMethod($className,$functionName);
+                if($functionObj->isStatic()){
+                    // 静态调用
+                    call_user_func([$className, $functionName], $con, $param);
+                }else{
+                    // 动态调用
+                    $obj = new $className;
+                    call_user_func([$obj, $functionName], $con, $param);
+                }
+            }else{
+                self::sendAlertMsg($con, "执行失败，动作“{$actionSign}” 不符合规范");
             }
-            self::$actionRoutes[$actionSign]($con, $param);
+
         });
         // 断开连接时
         $service->onClose(function($con){
@@ -168,7 +176,12 @@ class WsService
 }
 
 // 路由
-class route{
+class Route{
+
+    public function __construct()
+    {
+        var_dump('测试反射是否触发构建');
+    }
 
     // 给用户绑定链接
     private static function bindUserForCon($con, $userData)
@@ -220,7 +233,7 @@ class route{
     }
 
     // 用户发送聊天信息
-    public static function userSendMsg($con, $param){
+    public function userSendMsg($con, $param){
         $userData = $con->otherData['userData'];
         $roomId = $param['roomId'];
         $text = $param['text'];
@@ -260,5 +273,14 @@ class route{
         }
     }
 }
+
+// 登录
+WsService::setRoute('user/login', function($con, $param){ Route::login($con, $param); });
+// 断线重连
+WsService::setRoute('user/DAR', function($con, $param){ Route::dar($con, $param); });
+// 用户发送数据
+//WsService::setRoute('message/sendMsg', function($con, $param){ Route::userSendMsg($con, $param); });
+WsService::setRoute('message/sendMsg', 'Route@userSendMsg'); // 提供反射路由
+
 
 WsService::makeService();
