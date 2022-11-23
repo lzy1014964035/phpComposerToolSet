@@ -20,7 +20,7 @@ class ServiceExcel
     public static function exportEasy($fieldName, $titleConfig, $dataList)
     {
         $exportObj = new Export();
-        $exportObj->makeSheet($fieldName, $titleConfig, $dataList);
+        $exportObj->makeSheet('sheet1', $titleConfig, $dataList);
 
         $setFieldName = $fieldName;
         if(self::$fileHasDate == true){
