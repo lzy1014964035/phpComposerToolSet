@@ -29,12 +29,13 @@ class Export
         $sheet = $excel->getActiveSheet();  //获取当前操作sheet的对象
         $sheet->setTitle($sheelName);  //设置当前sheet的标题
 
+
+        $widthData = [];
         $fieldNum = 0;
         foreach($titleConfig as $fieldName)
         {
             $keyName = ServiceExcel::getKeyName($fieldNum);
-            //设置宽度为true,不然太窄了
-            $sheet->getDefaultColumnDimension()->setAutoSize(true);
+            $widthData[$fieldNum] = strlen($fieldName);
             // 设置标题字段
             $sheet->setCellValue("{$keyName}1", $fieldName);
             // 设置居中
@@ -42,7 +43,7 @@ class Export
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
                     'vertical' => Alignment::VERTICAL_CENTER,
-                    ]
+                ]
             ]);
 
             $fieldNum++;
@@ -55,12 +56,22 @@ class Export
             foreach($titleConfig as $field => $fieldName)
             {
                 $keyName = ServiceExcel::getKeyName($fieldNum);
+
+                $valueLen = strlen($value[$field]);
+                $widthData[$fieldNum] = $widthData[$fieldNum] > $valueLen ? $widthData[$fieldNum] : $valueLen;
+
                 $sheet->setCellValue("{$keyName}{$row}", $value[$field]);
                 $fieldNum++;
             }
         }
 
-//        $this->downloadExcel($excel, $fileName, 'Xls');
+
+        foreach($widthData as $fieldNum => $length)
+        {
+            //设置宽度为true,不然太窄了
+            $sheet->getColumnDimensionByColumn($fieldNum + 1)->setWidth($length + 4);
+        }
+
     }
 
     //公共文件，用来传入xls并下载
