@@ -3,6 +3,8 @@
 namespace ToolSet\Service\WebSocket;
 
 use Workerman\Worker;
+use Workerman\Connection\TcpConnection;
+use Workerman\Protocols\Http\Request;
 
 // 笔记
 // https://www.136.la/nginx/show-185043.html
@@ -25,10 +27,14 @@ class ServiceWebSocket
      */
     public function onConnect(callable $callbackFunction)
     {
-        $this->workerObj->onConnect = function($connection) use ($callbackFunction){
+        $this->workerObj->onConnect = function(TcpConnection $connection) use ($callbackFunction){
+            $connectionPool[$connection->id] = $connection;
             $callbackFunction($connection);
-            $connection->conId = ++self::$connectionId;
-            $connectionPool[$connection->conId] = $connection;
+            $connection->onWebSocketConnect = function($connection , $httpBuffer)
+            {
+                // 把路由附上
+                $connection->path = self::getWsConnectPath($httpBuffer);
+            };
         };
     }
 
@@ -38,7 +44,7 @@ class ServiceWebSocket
      */
     public function onMessage (callable $callbackFunction)
     {
-        $this->workerObj->onMessage = function($connection, $data) use ($callbackFunction){
+        $this->workerObj->onMessage = function(TcpConnection $connection, $data) use ($callbackFunction){
             $jsonDecodeData = json_decode($data, true);
             if($jsonDecodeData){
                 $data = $jsonDecodeData;
@@ -53,11 +59,10 @@ class ServiceWebSocket
      */
     public function onClose(callable $callbackFunction)
     {
-        $this->workerObj->onClose = function($connection) use ($callbackFunction){
+        $this->workerObj->onClose = function(TcpConnection $connection) use ($callbackFunction){
             $callbackFunction($connection);
             // 从链接组中删掉
-            $conId = $connection->conId;
-            unset($this->connectionPool[$conId]);
+            unset($this->connectionPool[$connection->id]);
         };
     }
 
@@ -72,6 +77,19 @@ class ServiceWebSocket
             $data = json_encode($data, JSON_UNESCAPED_UNICODE);
         }
         $connection->send($data);
+    }
+
+
+    public static function getWsConnectPath($wsConect)
+    {
+        $pattern = '/GET\s+\/\/(.+?)\s+HTTP\/1\.1/';
+
+        if (preg_match($pattern, $wsConect, $matches)) {
+            $route = $matches[1] ?? "";
+        } else {
+            $route = "";
+        }
+        return $route;
     }
 
     /**
