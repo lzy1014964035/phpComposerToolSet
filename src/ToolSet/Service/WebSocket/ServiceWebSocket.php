@@ -3,8 +3,6 @@
 namespace ToolSet\Service\WebSocket;
 
 use Workerman\Worker;
-use Workerman\Connection\TcpConnection;
-use Workerman\Protocols\Http\Request;
 
 // 笔记
 // https://www.136.la/nginx/show-185043.html
@@ -23,17 +21,19 @@ class ServiceWebSocket
 
     /**
      * 连接时
-     * @param callable $callbackFunction
+     * @param callable|null $onConnect  发起连接时
+     * @param callable|null $afterConnect  连接建立后
      */
-    public function onConnect(callable $callbackFunction)
+    public function onConnect(callable $onConnect = null, callable $afterConnect = null)
     {
-        $this->workerObj->onConnect = function(TcpConnection $connection) use ($callbackFunction){
-            $connectionPool[$connection->id] = $connection;
-            $callbackFunction($connection);
-            $connection->onWebSocketConnect = function($connection , $httpBuffer)
-            {
-                // 把路由附上
-                $connection->path = self::getWsConnectPath($httpBuffer);
+        $this->workerObj->onConnect = function($connection) use ($onConnect, $afterConnect){
+            if($onConnect)$onConnect($connection);
+            $connection->conId = ++self::$connectionId;
+            $connectionPool[$connection->conId] = $connection;
+            $connection->onWebSocketConnect = function ($connection, $httpHeader) use ($afterConnect) {
+                $path = self::getHeaderStringPath($httpHeader);
+                $connection->urlPath = $path;
+                if($afterConnect)$afterConnect($connection);
             };
         };
     }
@@ -44,7 +44,7 @@ class ServiceWebSocket
      */
     public function onMessage (callable $callbackFunction)
     {
-        $this->workerObj->onMessage = function(TcpConnection $connection, $data) use ($callbackFunction){
+        $this->workerObj->onMessage = function($connection, $data) use ($callbackFunction){
             $jsonDecodeData = json_decode($data, true);
             if($jsonDecodeData){
                 $data = $jsonDecodeData;
@@ -57,12 +57,13 @@ class ServiceWebSocket
      * 关闭时
      * @param callable $callbackFunction
      */
-    public function onClose(callable $callbackFunction)
+    public function onClose(callable $callbackFunction = null)
     {
-        $this->workerObj->onClose = function(TcpConnection $connection) use ($callbackFunction){
+        $this->workerObj->onClose = function($connection) use ($callbackFunction){
             $callbackFunction($connection);
             // 从链接组中删掉
-            unset($this->connectionPool[$connection->id]);
+            $conId = $connection->conId;
+            unset($this->connectionPool[$conId]);
         };
     }
 
@@ -79,24 +80,27 @@ class ServiceWebSocket
         $connection->send($data);
     }
 
-
-    public static function getWsConnectPath($wsConect)
-    {
-        $pattern = '/GET\s+\/\/(.+?)\s+HTTP\/1\.1/';
-
-        if (preg_match($pattern, $wsConect, $matches)) {
-            $route = $matches[1] ?? "";
-        } else {
-            $route = "";
-        }
-        return $route;
-    }
-
     /**
      * 启动服务
      */
     public static function makeService()
     {
         Worker::runAll();
+    }
+
+    /**
+     * 获取路径
+     * @param $requestHeaderString
+     * @return mixed|string
+     */
+    private static function getHeaderStringPath($requestHeaderString)
+    {
+        $pattern = '/GET\s+\/\/(.+?)\s+HTTP\/1\.1/';
+
+        $route = "";
+        if (preg_match($pattern, $requestHeaderString, $matches)) {
+            $route = $matches[1];
+        }
+        return $route;
     }
 }
