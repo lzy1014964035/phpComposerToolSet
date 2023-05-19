@@ -13,16 +13,32 @@ class ServiceWebSocket
     private $connectionPool = [];
     private static $connectionId = 0;
 
-    public function __construct($port = '2346', $workCount = 4)
+    public function __construct($param = [])
     {
+        $port = $param['port'] ?? '2346';
+        $workCount = $param['workCount'] ?? 4;
+        $ssl = $param['ssl'] ?? null;
+
+        $context = [];
+        if($ssl){
+            $context['ssl'] = [
+                'local_cert'  => $ssl['cert_path'], // 你的证书文件路径
+                'local_pk'    => $ssl['pk_path'], // 你的私钥文件路径
+                'verify_peer' => false,
+            ];
+        }
+
         $this->workerObj = new Worker("websocket://0.0.0.0:{$port}");
         $this->workerObj->count = $workCount;
+
+        if($ssl){
+            $this->workerObj->transport = 'ssl';
+        }
     }
 
     /**
      * 连接时
-     * @param callable|null $onConnect  发起连接时
-     * @param callable|null $afterConnect  连接建立后
+     * @param callable $callbackFunction
      */
     public function onConnect(callable $onConnect = null, callable $afterConnect = null)
     {
