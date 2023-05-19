@@ -19,16 +19,18 @@ class ServiceWebSocket
         $workCount = $param['workCount'] ?? 4;
         $ssl = $param['ssl'] ?? null;
 
+        $socketName = "websocket://0.0.0.0:{$port}";
         $context = [];
         if($ssl){
             $context['ssl'] = [
-                'local_cert'  => $ssl['pem_path'], // 你的证书文件路径
+                'local_cert'  => $ssl['cert_path'], // 你的证书文件路径
                 'local_pk'    => $ssl['key_path'], // 你的私钥文件路径
                 'verify_peer' => false,
             ];
+            $socketName = "websocket+ssl://0.0.0.0:{$port}";
         }
 
-        $this->workerObj = new Worker("websocket://0.0.0.0:{$port}");
+        $this->workerObj = new Worker($socketName, $context);
         $this->workerObj->count = $workCount;
 
         if($ssl){
