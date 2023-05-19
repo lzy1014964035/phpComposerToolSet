@@ -22,8 +22,8 @@ class ServiceWebSocket
         $context = [];
         if($ssl){
             $context['ssl'] = [
-                'local_cert'  => $ssl['cert_path'], // 你的证书文件路径
-                'local_pk'    => $ssl['pk_path'], // 你的私钥文件路径
+                'local_cert'  => $ssl['pem_path'], // 你的证书文件路径
+                'local_pk'    => $ssl['key_path'], // 你的私钥文件路径
                 'verify_peer' => false,
             ];
         }
