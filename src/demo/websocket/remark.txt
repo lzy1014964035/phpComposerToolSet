@@ -1,0 +1,8 @@
+因为php特性的缘故，导致不能使用多线程进行处理。
+意味着websocket服务器在监听前端websocket请求之后，并不能在于其他服务进行交互。
+比如理想的通知功能是：
+线程1监听redis。
+线程2监听前端websocket请求。
+然后通过通讯redis，使得redis转发websocket service 再转发 websocket client。
+这样的场景，workerman是做不到的。
+所以，如果遇到这样的场景。请使用 go channel。
