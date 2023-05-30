@@ -32,30 +32,35 @@ function enumeratePermutations($numbers, $prefix = []) {
 //$numbers = [1, 2, 3, 4];
 //enumeratePermutations($numbers);
 
+// 回溯当前操作值，之后创造出新的组合（！！！重中之重）
+// 假设当前注入的值2，前面已经注入了1 那么zuhe的内容就是 1，2
+// 然后 进行回溯，将值改变为 1  并且因为当前的value是2，所以在下一轮中，$zuhe就会变成 1，3 并且再次注入到 enumDeal中。
+// 之后下一轮中，因为 1，3都存在与$zuhe中，所以被插入的就是2.这时组合变成 1，3，2.
+// 然后回溯成 1，3并且因为这时value是2，那么下一轮判断的value就是3，但是3存在了，就只能再下一轮，就是$zuhe = 1，3，4 再将$zuhe注入enumDeal，$zuhe在下一个栈中就变成了1，3，4，2。
+
+// 总结就是，按个节点都进行回溯，并且跳过当前值用下一个值注入到$zuhe时。都相当于创造了一个新的树枝。
+// 再将新的树枝塞进下轮方法中，创造新一轮的树枝，这样就能完成所有可能的获取。
+
+// 回溯当前操作值，之后创造出新的组合（！！！重中之重）
+// 这段注释的解释是正确的。回溯操作的关键是通过删除最后一个元素（使用array_pop函数）来还原状态，从而在下一轮循环中创造新的组合。
+// 这是回溯算法的核心思想之一，它确保在每个递归层次上都能尝试所有可能的组合。
 
 function enumDeal($array, $zuhe = [], &$result = [])
 {
+    // 判断是否满足全元素的条件
     if(count($array) == count($zuhe)){
         $result[] = $zuhe;
     }
     foreach($array as $value){
+        // 确保元素唯一
         if(in_array($value, $zuhe)){
            continue;
         }
+        // 创造新的树枝，并将树枝注入到下一轮（重点）
         $zuhe[] = $value;
         enumDeal($array, $zuhe, $result);
-        // 回溯当前操作值，之后创造出新的组合（！！！重中之重）
-        // 假设当前注入的值2，前面已经注入了1 那么zuhe的内容就是 1，2
-        // 然后 进行回溯，将值改变为 1  并且因为当前的value是2，所以在下一轮中，$zuhe就会变成 1，3 并且再次注入到 enumDeal中。
-        // 之后下一轮中，因为 1，3都存在与$zuhe中，所以被插入的就是2.这时组合变成 1，3，2.
-        // 然后回溯成 1，3并且因为这时value是2，那么下一轮判断的value就是3，但是3存在了，就只能再下一轮，就是$zuhe = 1，3，4 再将$zuhe注入enumDeal，$zuhe在下一个栈中就变成了1，3，4，2。
 
-        // 总结就是，按个节点都进行回溯，并且跳过当前值用下一个值注入到$zuhe时。都相当于创造了一个新的树枝。
-        // 再将新的树枝塞进下轮方法中，创造新一轮的树枝，这样就能完成所有可能的获取。
-
-        // 回溯当前操作值，之后创造出新的组合（！！！重中之重）
-        // 这段注释的解释是正确的。回溯操作的关键是通过删除最后一个元素（使用array_pop函数）来还原状态，从而在下一轮循环中创造新的组合。
-        // 这是回溯算法的核心思想之一，它确保在每个递归层次上都能尝试所有可能的组合。
+        // 裁剪当前树枝，让下次轮询时创建新的树枝（重点）
         array_pop($zuhe);
     }
     return $result;
@@ -64,7 +69,9 @@ function enumDeal($array, $zuhe = [], &$result = [])
 // 根据key进行枚举
 function enumDealByKey($array)
 {
+    // 取key组
     $keyArray = array_keys($array);
+
     $enumValue = enumDeal($keyArray);
     foreach($enumValue as &$valueArray)
     {
