@@ -73,3 +73,44 @@ echo "\r\n---------------------------------------------\r\n";
 // 测试
 $maxValue = knapsackDiy($values, $weights, $capacity);
 echo "背包中物品的最大总价值：" . $maxValue;
+
+
+
+function knapsackDiy2($values, $weights, $capacity)
+{
+    // 获取物品的数量
+    $dataNum = count($values);
+    // 生成二维填充组
+    $dataPack = array_fill(0, $dataNum + 1, array_fill(0, $capacity + 1, 0));
+
+    for($dataKey = 1; $dataKey < $dataNum + 1; $dataKey++){
+        $nowValue = $values[$dataKey - 1];
+        $nowWeight = $weights[$dataKey - 1];
+        for($cacheWeight = 1; $cacheWeight < $capacity + 1; $cacheWeight++)
+        {
+            // 上面表格的价值
+            $topTableValue = $dataPack[$dataKey - 1][$cacheWeight];
+            if($cacheWeight < $nowWeight) {
+                // 把上面的表格搬下来
+                $dataPack[$dataKey][$cacheWeight] = $topTableValue;
+            }else{
+                // 剩余重量
+                $otherWeight = $cacheWeight - $nowWeight;
+                // 用剩余重量找上面的表格中对应的价值的物品
+                $otherDataValue = $dataPack[$dataKey - 1][$otherWeight];
+                // 之后将两个价值相加
+                $mergeValue = $nowValue + $otherDataValue;
+                // 之后对比，这个相加的价值，是否比上面表格的价值更大
+                $maxValue = $mergeValue > $topTableValue ? $mergeValue : $topTableValue;
+                // 之后将表格的价值存到当前位置方便后续的判断
+                $dataPack[$dataKey][$cacheWeight] = $maxValue;
+            }
+        }
+    }
+
+    return $dataPack[$dataNum][$capacity];
+}
+echo "\r\n---------------------------------------------\r\n";
+// 测试
+$maxValue = knapsackDiy2($values, $weights, $capacity);
+echo "背包中物品的最大总价值：" . $maxValue;
