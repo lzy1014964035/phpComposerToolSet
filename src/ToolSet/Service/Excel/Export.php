@@ -30,7 +30,8 @@ class Export
      *                      appointItemArray 填充指定格内容(比如在表头插个时间，插个导出人之类的)
      *                                  value 值
      *                                  merge 自动合并的参数
-     *                                  level_position 位置（ left 居左，center 居中，right 居右）
+     *                                  levelPosition 位置（ left 居左，center 居中，right 居右）
+     *                      setLineHeight  设置指定行的高度
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
     public function makeSheet($sheetName, $titleConfig, $dataList, $otherParam)
@@ -39,6 +40,7 @@ class Export
         $autoMergeField = isset($otherParam['autoMergeField']) ? $otherParam['autoMergeField'] : null;
         $listOffsetNum = isset($otherParam['listOffsetNum']) ? $otherParam['listOffsetNum'] : 0;
         $appointItemArray = isset($otherParam['appointItemArray']) ? $otherParam['appointItemArray'] : [];
+        $setLineHeight = isset($otherParam['setLineHeight']) ? $otherParam['setLineHeight'] : [];
 
 
         $excel = $this->excelObj;
@@ -114,6 +116,16 @@ class Export
         if($autoMergeData){
             $this->setAutoMerge($sheet, $autoMergeData);
         }
+
+        // 设置行高度
+        if($setLineHeight)
+        {
+            foreach($setLineHeight as $lineKey => $height)
+            {
+                $sheet->getRowDimension($lineKey)->setRowHeight($height);
+            }
+        }
+
     }
 
     /**
@@ -188,29 +200,17 @@ class Export
                     }
                 }
 
-                // 设置居左
-                if($levelPosition == "left"){
-                    $sheet->getStyle("{$key}:{$key}")->applyFromArray([
-                        'alignment' => [
-                            'horizontal' => Alignment::HORIZONTAL_LEFT,
-                        ]
-                    ]);
-                }
+                $levelPositionConfig = [
+                    'left' => Alignment::HORIZONTAL_LEFT,
+                    'center' => Alignment::HORIZONTAL_CENTER,
+                    'right' => Alignment::HORIZONTAL_RIGHT,
+                ];
 
-                // 设置居中
-                if($levelPosition == "center"){
+                $levelPositionValue = $levelPositionConfig[$levelPosition] ?? null;
+                if($levelPositionValue){
                     $sheet->getStyle("{$key}:{$key}")->applyFromArray([
                         'alignment' => [
-                            'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        ]
-                    ]);
-                }
-
-                // 设置居右
-                if($levelPosition == "right"){
-                    $sheet->getStyle("{$key}:{$key}")->applyFromArray([
-                        'alignment' => [
-                            'horizontal' => Alignment::HORIZONTAL_RIGHT,
+                            'horizontal' => $levelPositionValue,
                         ]
                     ]);
                 }
