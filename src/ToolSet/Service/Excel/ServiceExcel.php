@@ -10,27 +10,45 @@ class ServiceExcel
 {
     public static $fileHasDate = false;
     public static $fileHasTime = false;
+    public static $fileSavePath = './excel/export'; // 文件保存的路径
+    public static $fileFormat = 'Xls'; // 文件的后缀类型
+    public static $lastFileSavePath = null; // 文件存储的路径
+    public static $lastFileSavePathIsHasRand = false; // 文件存储的路径是否要随机数
+
+    public static $dataAllCenter = false; // 所有数据居中
 
     /**
      * 简单导出
      * @param $fieldName // 文件名称
      * @param $titleConfig // 表头配置 例如 ['name' => '用户名', 'phone' => '手机号',...]
      * @param $dataList // 内容列表 例如 [['name' => '张三', 'phone' => '13100000000'],['name' => '李四', 'phone' => '1320000000'],...]
+     * @param array $otherParam
+     *                      save_path 是否保存在服务器上
+     * @return null
+     * @throws \Exception
      */
-    public static function exportEasy($fieldName, $titleConfig, $dataList)
+    public static function exportEasy($fileName, $titleConfig, $dataList, $otherParam = [])
     {
         $exportObj = new Export();
-        $exportObj->makeSheet('sheet1', $titleConfig, $dataList);
+        $exportObj->makeSheet('sheet1', $titleConfig, $dataList, $otherParam);
 
-        $setFieldName = $fieldName;
+        $fileName = str_replace(' ', '_', $fileName);
+        $fileName = str_replace(':', '：', $fileName);
+
+        $setFileName = $fileName;
         if(self::$fileHasDate == true){
-            $setFieldName = $fieldName . ServiceBase::getYmdDate();
+            $setFileName = $fileName . ServiceBase::getYmdDate();
         }
         if(self::$fileHasTime == true){
-            $setFieldName = $fieldName . ServiceBase::getYmdHisDate();
+            $setFileName = $fileName . ServiceBase::getYmdHisDate();
         }
-
-        $exportObj->downloadExcel($setFieldName);
+        $result = null;
+        if($otherParam['save_path']){
+            $exportObj->saveFileToPath();
+            return $result;
+        }
+        $exportObj->downloadExcel($setFileName);
+        return $result;
     }
 
     /**
@@ -88,6 +106,19 @@ class ServiceExcel
         }
 
         return $keyName;
+    }
+
+    public static function setLastSavePath($setFieldName)
+    {
+        if(self::$lastFileSavePathIsHasRand == true){
+            $randNum = time() . mt_rand(1111, 9999);
+            $setFieldName = "{$setFieldName}_{$randNum}";
+        }
+        $fileSavePath = self::$fileSavePath;
+        $format = self::$fileFormat;
+        $savePath = "{$fileSavePath}/{$setFieldName}.{$format}";
+        self::$lastFileSavePath = $savePath;
+        return $savePath;
     }
 
 }

@@ -22,17 +22,16 @@ class ExportMany
      * @param $dataList // 内容列表 例如 [['name' => '张三', 'phone' => '13100000000'],['name' => '李四', 'phone' => '1320000000'],...]
      * @return Export
      */
-    public function makeSheet($sheetName, $titleConfig, $dataList)
+    public function makeSheet($sheetName, $titleConfig, $dataList, $otherParam = [])
     {
-        $this->excelObject->makeSheet($sheetName, $titleConfig, $dataList);
+        $this->excelObject->makeSheet($sheetName, $titleConfig, $dataList, $otherParam);
         return $this->excelObject;
     }
 
     /**
      * 下载
-     * @return Export
      */
-    public function download()
+    public function download($otherParam = [])
     {
         $setFieldName = $this->fieldName;
         if (ServiceExcel::$fileHasDate == true) {
@@ -41,8 +40,13 @@ class ExportMany
         if (ServiceExcel::$fileHasTime == true) {
             $setFieldName = $this->fieldName . ServiceBase::getYmdHisDate();
         }
+        $result = null;
+        if($otherParam['save_path']){
+            $this->excelObject->saveFileToPath();
+            return $result;
+        }
         $this->excelObject->downloadExcel($setFieldName);
-        return $this->excelObject;
+        return $result;
     }
 
 }
