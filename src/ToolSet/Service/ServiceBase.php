@@ -11,6 +11,12 @@ class ServiceBase
     use ServiceString;
     use ServiceTime;
 
+    // 生成对象
+    public static function make(...$param)
+    {
+        return new static(...$param);
+    }
+
     // 是否打印,一般是cli脚本才开启该参数
     public static $checkDump = false;
 
