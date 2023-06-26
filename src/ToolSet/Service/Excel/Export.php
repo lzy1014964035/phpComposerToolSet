@@ -31,6 +31,7 @@ class Export
      *                                  value 值
      *                                  merge 自动合并的参数
      *                                  levelPosition 位置（ left 居左，center 居中，right 居右）
+     *                                  fontColor  字体颜色  'FF0000' 用rgb255
      *                      setLineHeight  设置指定行的高度
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      */
@@ -179,9 +180,10 @@ class Export
                 $value = $data;
                 $sheet->setCellValue($key, $value);
             }else{
-                $value = $data['value'];
-                $merge = $data['merge'] ?? "";
-                $levelPosition = $data['levelPosition'] ?? "";
+                $value = isset($data['value']) ? $data['value'] : null;
+                $merge = isset($data['merge']) ? $data['merge'] : null;
+                $levelPosition = isset($data['levelPosition']) ? $data['levelPosition'] : null;
+                $fontColor = isset($data['fontColor']) ? $data['fontColor'] : null;
                 // 字段合并
                 if($merge){
                     if(is_string($merge)){
@@ -216,7 +218,15 @@ class Export
                 }
 
                 // 设置值
-                $sheet->setCellValue($key, $value);
+                if($value !== null){
+                    $sheet->setCellValue($key, $value);
+                }
+
+
+                // 设置颜色
+                if($fontColor){
+                    $sheet->getStyle($key)->getFont()->setColor(new Color($fontColor));
+                }
             }
         }
     }
