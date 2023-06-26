@@ -15,14 +15,14 @@ class ServiceAES extends ServiceBase
         $this->iv = $iv;
     }
 
-    function encryptAES($data) {
+    public function encrypt($data) {
         $cipher = "AES-256-CBC";
         $options = OPENSSL_RAW_DATA;
         $encrypted = openssl_encrypt($data, $cipher, $this->key, $options, $this->iv);
         return base64_encode($encrypted);
     }
 
-    function decryptAES($encryptedData) {
+    public function decrypt($encryptedData) {
         $cipher = "AES-256-CBC";
         $options = OPENSSL_RAW_DATA;
         $decrypted = openssl_decrypt(base64_decode($encryptedData), $cipher, $this->key, $options, $this->iv);
