@@ -45,7 +45,7 @@ class ServiceExcel
             $setFileName = $fileName . ServiceBase::getYmdHisDate();
         }
         $result = null;
-        if($otherParam['is_save_with_last_path']){
+        if(isset($otherParam['is_save_with_last_path']) && $otherParam['is_save_with_last_path'] === true){
             $exportObj->saveFileToPath();
             return $result;
         }
