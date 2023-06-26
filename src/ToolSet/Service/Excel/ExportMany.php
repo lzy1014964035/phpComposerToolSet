@@ -41,7 +41,7 @@ class ExportMany
             $setFieldName = $this->fieldName . ServiceBase::getYmdHisDate();
         }
         $result = null;
-        if($otherParam['save_path']){
+        if($otherParam['is_save_path']){
             $this->excelObject->saveFileToPath();
             return $result;
         }
