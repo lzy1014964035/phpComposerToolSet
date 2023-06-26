@@ -111,16 +111,16 @@ class ServiceExcel
     }
 
     // 设置最新的存储路径
-    public static function setLastSavePath($setFieldName)
+    public static function setLastSavePath($fileName)
     {
         if(self::$lastFileSavePathIsHasRand == true){
             $num = ServiceBase::getMicrosecondsTime();
             $num *= 10000;
-            $setFieldName = "{$setFieldName}_t{$num}";
+            $fileName = "{$fileName}_t{$num}";
         }
         $fileSavePath = self::$fileSavePath;
         $format = self::$fileFormat;
-        $savePath = "{$fileSavePath}/{$setFieldName}.{$format}";
+        $savePath = "{$fileSavePath}/{$fileName}.{$format}";
         self::$lastFileSavePath = $savePath;
         return $savePath;
     }
