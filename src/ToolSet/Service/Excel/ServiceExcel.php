@@ -17,6 +17,8 @@ class ServiceExcel
 
     public static $dataAllCenter = false; // 所有数据居中
 
+    public static $deleteFileTimeOut = 3600 * 24 * 7; // 删除多久之前生成的文件
+
     /**
      * 简单导出
      * @param $fieldName // 文件名称
@@ -108,11 +110,13 @@ class ServiceExcel
         return $keyName;
     }
 
+    // 设置最新的存储路径
     public static function setLastSavePath($setFieldName)
     {
         if(self::$lastFileSavePathIsHasRand == true){
-            $randNum = time() . mt_rand(1111, 9999);
-            $setFieldName = "{$setFieldName}_{$randNum}";
+            $num = ServiceBase::getMicrosecondsTime();
+            $num *= 10000;
+            $setFieldName = "{$setFieldName}_t{$num}";
         }
         $fileSavePath = self::$fileSavePath;
         $format = self::$fileFormat;
@@ -121,4 +125,50 @@ class ServiceExcel
         return $savePath;
     }
 
+    // 获取所有存储的文件
+    public static function getAllSaveFile()
+    {
+        $savePath = self::$fileSavePath;
+        if(!is_dir($savePath)){
+            return [];
+        }
+        $files = scandir($savePath);
+        $returnFiles = [];
+        foreach($files as $file)
+        {
+            if ($file !== '.' && $file !== '..') {
+                $returnFiles[] = "{$savePath}/{$file}";
+            }
+        }
+        return $returnFiles;
+    }
+
+    // 删除存储的文件
+    public static function deleteSaveFile($filePath)
+    {
+        if(file_exists($filePath)){
+            unlink($filePath);
+        }
+    }
+
+    // 删除过期的文件
+    public static function deleteTimeOutFiles()
+    {
+        echo "<pre>";
+        $files = self::getAllSaveFile();
+        foreach($files as $filePath)
+        {
+            $filePathArray = explode('_', $filePath);
+            $filePathArrayLast = end($filePathArray);
+            preg_match('/t(\d+)/', $filePathArrayLast, $matches);
+            $timeNum = isset($matches[1]) ? $matches[1] : null;
+            if(empty($timeNum)){
+                continue;
+            }
+            $timeNum = ServiceBase::beDividedBy($timeNum, 10000, -1);
+            if($timeNum < time() - self::$deleteFileTimeOut){
+                self::deleteSaveFile($filePath);
+            }
+        }
+    }
 }
