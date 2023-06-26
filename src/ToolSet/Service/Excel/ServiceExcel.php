@@ -13,7 +13,7 @@ class ServiceExcel
     public static $fileSavePath = './excel/export'; // 文件保存的路径
     public static $fileFormat = 'Xls'; // 文件的后缀类型
     public static $lastFileSavePath = null; // 文件存储的路径
-    public static $lastFileSavePathIsHasRand = false; // 文件存储的路径是否要随机数
+    public static $lastFileSavePathIsHasTimePath = false; // 文件存储的路径是否要随机数
 
     public static $dataAllCenter = false; // 所有数据居中
 
@@ -113,7 +113,7 @@ class ServiceExcel
     // 设置最新的存储路径
     public static function setLastSavePath($fileName)
     {
-        if(self::$lastFileSavePathIsHasRand == true){
+        if(self::$lastFileSavePathIsHasTimePath == true){
             $num = ServiceBase::getMicrosecondsTime();
             $num *= 10000;
             $fileName = "{$fileName}_t{$num}";
