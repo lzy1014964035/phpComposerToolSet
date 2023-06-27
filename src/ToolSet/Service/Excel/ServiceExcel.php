@@ -71,13 +71,15 @@ class ServiceExcel
      * @param $sheetIndexOrName // sheet页面的下标
      * @param $configData // 字段配置
      * @param null $callbackFunction // 回调方法 function($rowItem, $rowNum)
+     * @param array $otherParam 其他参数
+     *                    offsetTop 距离顶部偏移量 （跳过多少行之后开始处理）
      * @return array
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
-    public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null)
+    public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null, $otherParam = [])
     {
-        return Import::import($fileData, $sheetIndexOrName, $configData, $callbackFunction);
+        return Import::import($fileData, $sheetIndexOrName, $configData, $callbackFunction, $otherParam);
     }
 
 

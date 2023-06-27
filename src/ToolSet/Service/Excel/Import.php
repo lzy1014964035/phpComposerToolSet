@@ -18,8 +18,9 @@ class Import
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
      */
-    public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null)
+    public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null, $otherParam = [])
     {
+        $offsetTop = isset($otherParam['offsetTop']) ? $otherParam['offsetTop'] : 0;
         $fileSize = $fileData['size'];
         $fileExtendName = substr(strrchr($fileData["name"], '.'), 1);
 
@@ -44,6 +45,14 @@ class Import
 
             // 转化成列表
             $list = $sheet->toArray();
+
+            // 如果存在偏移量，就先剔除偏移范围的行
+            if($offsetTop > 0){
+                for($i = 0; $i < $offsetTop; $i++){
+                    unset($list[$i]);
+                }
+                $list = array_values($list);
+            }
 
             // 剔除全空的行
             foreach($list as $key => $value)
@@ -75,7 +84,8 @@ class Import
             foreach($configData as $fieldName => $field)
             {
                 if( ! isset($titleArray[$fieldName])){
-                    throw new Exception("excel导入失败 字段{{$fieldName}}再列中不存在");
+                    continue;
+//                    throw new Exception("excel导入失败 字段{{$fieldName}}再列中不存在");
                 }
                 $fieldConfig[$field] = $titleArray[$fieldName];
             }
