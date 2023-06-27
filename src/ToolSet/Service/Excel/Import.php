@@ -100,7 +100,7 @@ class Import
                 foreach($fieldConfig as $field => $fieldKey)
                 {
                     $fieldValue = $value[$fieldKey];
-                    if(is_string($fieldValue) && strpos("\n", $fieldValue) !== false){
+                    if(is_string($fieldValue) && strpos($fieldValue, "\n") !== false){
                         $fieldValue = explode("\n", $fieldValue);
                         $value[$fieldKey] = $fieldValue;
                     }
