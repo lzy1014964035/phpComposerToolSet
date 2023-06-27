@@ -300,10 +300,12 @@ class Export
     public function saveFileToPath()
     {
         $format = ServiceExcel::$fileFormat;
-        $savePath = ServiceExcel::$fileSavePath;
         $saveFilePath = ServiceExcel::$lastFileSavePath;
-        if( ! is_dir($savePath)){
-            mkdir($savePath, 0777 ,true);
+        $saveDirPathArray = explode('/', $saveFilePath);
+        unset($saveDirPathArray[count($saveDirPathArray) - 1]);
+        $saveDirPath = implode('/', $saveDirPathArray);
+        if( ! is_dir($saveDirPath)){
+            mkdir($saveDirPath, 0777 ,true);
         }
         if(empty($saveFilePath)){
             throw new \Exception('保存excel文件失败，请先设置保存的路径');

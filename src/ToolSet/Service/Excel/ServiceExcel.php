@@ -124,9 +124,6 @@ class ServiceExcel
         }
         $fileSavePath = self::$fileSavePath;
         $format = self::$fileFormat;
-        if(!is_dir("{$fileSavePath}/{$num}")){
-            mkdir("{$fileSavePath}/{$num}", 0777, true);
-        }
         $savePath = "{$fileSavePath}/{$num}/{$fileName}.{$format}";
         self::$lastFileSavePath = $savePath;
         return $savePath;
