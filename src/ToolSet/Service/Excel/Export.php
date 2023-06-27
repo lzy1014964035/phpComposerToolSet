@@ -57,13 +57,25 @@ class Export
 
         $widthData = [];
         $fieldNum = 0;
-        foreach($titleConfig as $fieldName)
+        foreach($titleConfig as $fieldNameOrArray)
         {
+            $fontColor = null;
+            if(is_array($fieldNameOrArray)){
+                $fieldName = $fieldNameOrArray['fieldName'];
+                $fontColor = $fieldNameOrArray['fontColor'] ?? null;
+            }else{
+                $fieldName = $fieldNameOrArray;
+            }
             $keyName = ServiceExcel::getKeyName($fieldNum);
             $widthData[$fieldNum] = strlen($fieldName);
             $row = 1 + $listOffsetNum;
             // 设置标题字段
-            $sheet->setCellValue("{$keyName}{$row}", $fieldName);
+            $titleKey = "{$keyName}{$row}";
+            $sheet->setCellValue($titleKey, $fieldName);
+            // 设置颜色
+            if(isset($fontColor)){
+                $sheet->getStyle($titleKey)->getFont()->setColor(new Color($fontColor));
+            }
             $fieldNum++;
         }
 
