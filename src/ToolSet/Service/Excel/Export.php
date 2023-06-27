@@ -67,24 +67,35 @@ class Export
             $fieldNum++;
         }
 
-        // 设置居中
-        if(ServiceExcel::$dataAllCenter){
+        // 设置位置
+        $alignment = [];
+        // 水平位置
+        if(ServiceExcel::$dataAllHorizontallyPosition) {
+            $config = [
+                'left' => Alignment::HORIZONTAL_LEFT,
+                'center' => Alignment::HORIZONTAL_CENTER,
+                'right' => Alignment::HORIZONTAL_RIGHT,
+            ];
+            $horizontal = isset($config[ServiceExcel::$dataAllHorizontallyPosition]) ? $config[ServiceExcel::$dataAllHorizontallyPosition] : null;
+            if($horizontal)$alignment['horizontal'] = $horizontal;
+        }
+        // 垂直位置
+        if(ServiceExcel::$dataAllVerticalPosition) {
+            $config = [
+                'top' => Alignment::VERTICAL_TOP,
+                'center' => Alignment::VERTICAL_CENTER,
+                'bottom' => Alignment::VERTICAL_BOTTOM,
+            ];
+            $vertical = isset($config[ServiceExcel::$dataAllVerticalPosition]) ? $config[ServiceExcel::$dataAllVerticalPosition] : null;
+            if($vertical)$alignment['vertical'] = $vertical;
+        }
+        // 如果存在位置，就进行设置
+        if($alignment){
             $sheet->getStyle("A:ZZ")->applyFromArray([
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ]
+                'alignment' => $alignment
             ]);
         }
 
-        // 设置居左
-        if(ServiceExcel::$dataAllLeft){
-            $sheet->getStyle("A:ZZ")->applyFromArray([
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_LEFT,
-                ]
-            ]);
-        }
 
         // 设置自动换行
         $sheet->getStyle('A:ZZ')->getAlignment()->setWrapText(true);
