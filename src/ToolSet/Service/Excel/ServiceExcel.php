@@ -5,6 +5,7 @@ namespace ToolSet\Service\Excel;
 use \PhpOffice\PhpSpreadsheet\Spreadsheet;
 use \PhpOffice\PhpSpreadsheet\IOFactory;
 use ToolSet\Service\ServiceBase;
+use ToolSet\Service\ServiceFile;
 
 class ServiceExcel
 {
@@ -113,14 +114,16 @@ class ServiceExcel
     // 设置最新的存储路径
     public static function setLastSavePath($fileName)
     {
+        $num = "not_time";
         if(self::$lastFileSavePathIsHasTimePath == true){
-            $num = ServiceBase::getMicrosecondsTime();
-            $num *= 10000;
-            $fileName = "{$fileName}_t{$num}";
+            $num = time() . mt_rand(1111, 9999);
         }
         $fileSavePath = self::$fileSavePath;
         $format = self::$fileFormat;
-        $savePath = "{$fileSavePath}/{$fileName}.{$format}";
+        if(!is_dir("{$fileSavePath}/{$num}")){
+            mkdir("{$fileSavePath}/{$num}", 0777, true);
+        }
+        $savePath = "{$fileSavePath}/{$num}/{$fileName}.{$format}";
         self::$lastFileSavePath = $savePath;
         return $savePath;
     }
@@ -146,8 +149,8 @@ class ServiceExcel
     // 删除存储的文件
     public static function deleteSaveFile($filePath)
     {
-        if(file_exists($filePath)){
-            unlink($filePath);
+        if(is_dir($filePath)){
+           ServiceFile::forceDeleteDirectory($filePath);
         }
     }
 
@@ -158,14 +161,12 @@ class ServiceExcel
         $files = self::getAllSaveFile();
         foreach($files as $filePath)
         {
-            $filePathArray = explode('_', $filePath);
-            $filePathArrayLast = end($filePathArray);
-            preg_match('/t(\d+)/', $filePathArrayLast, $matches);
-            $timeNum = isset($matches[1]) ? $matches[1] : null;
-            if(empty($timeNum)){
+            $filePathArray = explode('/', $filePath);
+            $endPath = end($filePathArray);
+            if(!is_numeric($endPath)){
                 continue;
             }
-            $timeNum = ServiceBase::beDividedBy($timeNum, 10000, -1);
+            $timeNum = floor(ServiceBase::beDividedBy($endPath, 10000));
             if($timeNum < time() - self::$deleteFileTimeOut){
                 self::deleteSaveFile($filePath);
             }
