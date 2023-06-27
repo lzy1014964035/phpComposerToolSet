@@ -16,7 +16,8 @@ class ServiceExcel
     public static $lastFileSavePath = null; // 文件存储的路径
     public static $lastFileSavePathIsHasTimePath = false; // 文件存储的路径是否要随机数
 
-    public static $dataAllCenter = false; // 所有数据居中
+    public static $dataAllCenter = false; // 所有数据居中|
+    public static $dataAllLeft = false; // 所有数据居左
 
     public static $deleteFileTimeOut = 3600 * 24 * 7; // 删除多久之前生成的文件
 

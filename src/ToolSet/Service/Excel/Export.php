@@ -77,6 +77,15 @@ class Export
             ]);
         }
 
+        // 设置居左
+        if(ServiceExcel::$dataAllLeft){
+            $sheet->getStyle("A:ZZ")->applyFromArray([
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_LEFT,
+                ]
+            ]);
+        }
+
         // 设置自动换行
         $sheet->getStyle('A:ZZ')->getAlignment()->setWrapText(true);
 
@@ -88,7 +97,18 @@ class Export
             {
                 $keyName = ServiceExcel::getKeyName($fieldNum);
 
-                $valueLen = strlen($value[$field]);
+                if(is_array($value[$field])){
+                    $maxLen = 0;
+                    foreach ($value[$field] as $string) {
+                        $nowLen = strlen($string);
+                        if(strlen($string) > $maxLen)$maxLen = $nowLen;
+                    }
+                    $value[$field] = implode("\n", $value[$field]);
+                    $valueLen = strlen($value[$field]);
+                }else{
+                    $valueLen = strlen($value[$field]);
+                }
+
                 $widthData[$fieldNum] = $widthData[$fieldNum] > $valueLen ? $widthData[$fieldNum] : $valueLen;
 
                 $key = "{$keyName}{$row}";
@@ -178,9 +198,11 @@ class Export
             # todo 这里不好做自动设置宽度的处理，暂时没空优化，后续有时间了，想法优化一下
             if(!is_array($data)){
                 $value = $data;
+                $value = is_array($value) ? implode("\n", $value) : $value;
                 $sheet->setCellValue($key, $value);
             }else{
                 $value = isset($data['value']) ? $data['value'] : null;
+                $value = is_array($value) ? implode("\n", $value) : $value;
                 $merge = isset($data['merge']) ? $data['merge'] : null;
                 $levelPosition = isset($data['levelPosition']) ? $data['levelPosition'] : null;
                 $fontColor = isset($data['fontColor']) ? $data['fontColor'] : null;
