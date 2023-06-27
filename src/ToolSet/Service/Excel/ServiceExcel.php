@@ -73,6 +73,7 @@ class ServiceExcel
      * @param null $callbackFunction // 回调方法 function($rowItem, $rowNum)
      * @param array $otherParam 其他参数
      *                    offsetTop 距离顶部偏移量 （跳过多少行之后开始处理）
+     *                    isSetFile 是否是指定的文件，有些时候不一定要解析上传的文件，指定的文件也要解析
      * @return array
      * @throws \PhpOffice\PhpSpreadsheet\Exception
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception

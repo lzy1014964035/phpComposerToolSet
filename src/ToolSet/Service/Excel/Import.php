@@ -21,10 +21,11 @@ class Import
     public static function import($fileData, $sheetIndexOrName, $configData, $callbackFunction = null, $otherParam = [])
     {
         $offsetTop = isset($otherParam['offsetTop']) ? $otherParam['offsetTop'] : 0;
+        $isSetFile = isset($otherParam['isSetFile']) ? $otherParam['isSetFile'] : false;
         $fileSize = $fileData['size'];
         $fileExtendName = substr(strrchr($fileData["name"], '.'), 1);
 
-        if (is_uploaded_file($fileData['tmp_name'])) {
+        if (is_uploaded_file($fileData['tmp_name']) || $isSetFile) {
             // 有Xls和Xlsx格式两种
             if(strtolower($fileExtendName) == "xlsx"){
                 $objReader = IOFactory::createReader('Xlsx');
