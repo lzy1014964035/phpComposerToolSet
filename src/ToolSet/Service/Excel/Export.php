@@ -101,10 +101,10 @@ class Export
                     $maxLen = 0;
                     foreach ($value[$field] as $string) {
                         $nowLen = strlen($string);
-                        if(strlen($string) > $maxLen)$maxLen = $nowLen;
+                        if($nowLen > $maxLen)$maxLen = $nowLen;
                     }
                     $value[$field] = implode("\n", $value[$field]);
-                    $valueLen = strlen($value[$field]);
+                    $valueLen = $maxLen;
                 }else{
                     $valueLen = strlen($value[$field]);
                 }
