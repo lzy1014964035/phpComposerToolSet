@@ -99,11 +99,6 @@ class Import
                 $setData = [];
                 foreach($fieldConfig as $field => $fieldKey)
                 {
-                    $fieldValue = $value[$fieldKey];
-                    if(is_string($fieldValue) && strpos($fieldValue, "\n") !== false){
-                        $fieldValue = explode("\n", $fieldValue);
-                        $value[$fieldKey] = $fieldValue;
-                    }
                     $setData[$field] = $value[$fieldKey];
                 }
                 if(is_callable($callbackFunction)){
