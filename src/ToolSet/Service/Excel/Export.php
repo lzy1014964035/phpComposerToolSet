@@ -120,27 +120,38 @@ class Export
             {
                 $keyName = ServiceExcel::getKeyName($fieldNum);
 
-                if(is_array($value[$field])){
+                $fieldValue = $value[$field];
+
+                // 如果传入的是一个配置
+                $fontColor = null;
+                if(is_array($fieldValue) && isset($fieldValue['value'])){
+                    $config = $fieldValue;
+                    $fieldValue = $config['value'];
+                    $fontColor = $config['fontColor'] ?? null;
+                }
+
+                if(is_array($fieldValue)){
                     $maxLen = 0;
-                    foreach ($value[$field] as $string) {
+                    foreach ($fieldValue as $string) {
                         $nowLen = strlen($string);
                         if($nowLen > $maxLen)$maxLen = $nowLen;
                     }
-                    $value[$field] = implode("\n", $value[$field]);
+                    $fieldValue = implode("\n", $fieldValue);
                     $valueLen = $maxLen;
                 }else{
-                    $valueLen = strlen($value[$field]);
+                    $valueLen = strlen($fieldValue);
                 }
 
                 $widthData[$fieldNum] = $widthData[$fieldNum] > $valueLen ? $widthData[$fieldNum] : $valueLen;
 
                 $key = "{$keyName}{$row}";
-                $sheet->setCellValue($key, $value[$field]);
+                $sheet->setCellValue($key, $fieldValue);
+                if(isset($fontColor))$sheet->getStyle($key)->getFont()->setColor(new Color($fontColor));
                 $fieldNum++;
 
                 // 如果需要自动合并就记录KEY
                 if($autoMergeField && in_array($field, $autoMergeField)){
-                    $autoMergeData[$field][$key] = $value[$field];
+                    $autoMergeData[$field][$key] = $fieldValue;
                 }
             }
         }
