@@ -120,7 +120,7 @@ class Export
             {
                 $keyName = ServiceExcel::getKeyName($fieldNum);
 
-                $fieldValue = $value[$field];
+                $fieldValue = $value[$field] ?? "";
 
                 // 如果传入的是一个配置
                 $fontColor = null;
