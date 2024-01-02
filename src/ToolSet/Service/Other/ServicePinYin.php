@@ -35,7 +35,7 @@ class ServicePinYin extends ServiceBase
     // 获取拼音首字母字符串
     public function getAbbrString($string, $linkSign)
     {
-        return $this->pinyinObject->abbr($string, $linkSign);
+        return $this->pinyinObject->abbr($string, $linkSign = '');
     }
 
 
