@@ -32,7 +32,7 @@ class ServicePinYin extends ServiceBase
         return $this->pinyinObject->permalink($string, $linkSign);
     }
 
-    // 获取拼音首字母字符串
+    // 获取拼音首字母字符串 
     public function getAbbrString($string, $linkSign = '')
     {
         return $this->pinyinObject->abbr($string, $linkSign);
