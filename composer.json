@@ -15,7 +15,8 @@
     ,"phpoffice/phpspreadsheet": "^1.23"
     ,"php-mqtt/client": "v1.4.0"
     ,"workerman/workerman": "v4.0.40"
-    ,"workerman/mqtt": "v1.3"
+    ,"workerman/mqtt": "v1.3",
+    "overtrue/pinyin": "4.x-dev"
   },
   "autoload": {
     "psr-4": {
