@@ -219,4 +219,10 @@ trait ServiceString
         return 0;
     }
 
+
+    // 根据中文字符串的长度
+    public static function getStringLengthWithChinese($string){
+        return mb_strlen($string, 'UTF-8');
+    }
+
 }
