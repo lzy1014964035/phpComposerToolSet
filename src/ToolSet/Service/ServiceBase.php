@@ -274,5 +274,19 @@ class ServiceBase
         }
     }
 
+    // 注册异常捕捉
+    public static function registerErrorTrapping(callable $function)
+    {
+        // 注册一个函数，用来捕捉 内存溢出这种类型 的try cache捕捉不到的致命错误
+        register_shutdown_function(function () use ($function) {
+            $error = error_get_last();
+            if ($error !== null) {
+                $function($error);
+            }
+            // 清除最后的错误信息，使其不再被触发
+//            error_clear_last();
+        });
+    }
+
 
 }
