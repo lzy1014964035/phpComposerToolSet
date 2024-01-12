@@ -23,7 +23,7 @@ class ServiceADES extends ServiceBase
             "private_key_bits" => 4096,
             "private_key_type" => OPENSSL_KEYTYPE_RSA,
         ];
-        # todo 有读不到config的问题。error:0E064002:configuration file routines:CONF_load:system lib
+        # todo win环境有读不到config的问题。error:0E064002:configuration file routines:CONF_load:system lib
         $res = openssl_pkey_new($config);
         if ($res === false) {
             throw new \Exception(openssl_error_string());
